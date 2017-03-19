@@ -1,0 +1,29 @@
+{
+  "name": "hapi-req",
+  "description": "hapi plugin to manage http requests",
+  "private": true,
+  "homepage": "https://github.com/firstandthird/hapi-req",
+  "author": "First+Third",
+  "version": "0.0.1",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/firstandthird/hapi-req.git"
+  },
+  "devDependencies": {
+    "code": "4.0.0",
+    "eslint": "3.17.0",
+    "eslint-config-firstandthird": "3.2.0",
+    "eslint-plugin-import": "2.2.0",
+    "lab": "12.1.0"
+  },
+  "dependencies": {
+    "wreck": "10.0.0",
+    "boom": "~4.2.0"
+  },
+  "eslintConfig": {
+    "extends": "firstandthird",
+    "rules": {
+      "no-underscore-dangle": 0
+    }
+  }
+}
