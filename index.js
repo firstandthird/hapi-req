@@ -5,6 +5,7 @@ const remote = require('./request.js');
 exports.register = function(server, pluginOptions, next) {
   const callIt = (method, url, options, callback) => {
     Object.assign(options, pluginOptions);
+    // construct url from any relevant options:
     if (options.query) {
       const queries = [];
       Object.keys(options.query).forEach((queryKey) => {
@@ -15,9 +16,8 @@ exports.register = function(server, pluginOptions, next) {
     // todo: headers
     // if (options.headers) {
     // }
-    // construct url from options:
-    if (url[0] === '/') {
-      return remote(server, method, url, options, callback);
+    if (url[0] === '/' || url.split('://')[0] === 'http') {
+      return remote(method, url, options, callback);
     }
     return local(server, method, `/${url}`, options, callback);
   };

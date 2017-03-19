@@ -1,10 +1,6 @@
+'use strict';
 const Boom = require('boom');
 module.exports = (server, method, url, options, done) => {
-  console.log('gonna inject it:')
-  console.log(method)
-  console.log(url)
-  console.log(options)
-  console.log(done)
   const packet = {
     method,
     url
