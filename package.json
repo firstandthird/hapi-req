@@ -9,6 +9,9 @@
     "type": "git",
     "url": "https://github.com/firstandthird/hapi-req.git"
   },
+  "scripts": {
+    "test": "lab -e test/test.*.js"
+  },
   "devDependencies": {
     "code": "4.0.0",
     "eslint": "3.17.0",

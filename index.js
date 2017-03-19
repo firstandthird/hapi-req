@@ -2,30 +2,50 @@
 const local = require('./inject.js');
 const remote = require('./request.js');
 
-exports.register = function(server, options, next) {
-  const callIt = (method, url, data, callback) => {
-    if (url[0] === '/') {
-      return remote(server, method, url, data, callback);
+exports.register = function(server, pluginOptions, next) {
+  const callIt = (method, url, options, callback) => {
+    Object.assign(options, pluginOptions);
+    if (options.query) {
+      const queries = [];
+      Object.keys(options.query).forEach((queryKey) => {
+        queries.push(`${queryKey}=${options.query[queryKey]}`);
+      });
+      url += `?${queries.join('&')}`;
     }
-    return local(server, method, url, data, callback);
+    // todo: headers
+    // if (options.headers) {
+    // }
+    // construct url from options:
+    if (url[0] === '/') {
+      return remote(server, method, url, options, callback);
+    }
+    return local(server, method, `/${url}`, options, callback);
   };
-  server.method('req.get', (method, url, callback) => {
-    callIt(method, url, callback);
+  const req = {
+    get(url, options, callback) {
+      callIt('get', url, options, callback);
+    },
+    post(url, options, callback) {
+      callIt('post', url, options, callback);
+    }
+  };
+  server.decorate('server', 'req', req);
+  /*
+  server.decorate('server', 'req.delete', (method, url, callback) => {
+    callIt('delete', url, callback);
   });
-  server.method('req.delete', (method, url, callback) => {
-    callIt(method, url, callback);
+  server.decorate('server', 'req.put', (method, url, data, callback) => {
+    callIt('put', url, data, callback);
   });
-  server.method('req.put', (method, url, data, callback) => {
-    callIt(method, url, data, callback);
+  server.decorate('server', 'req.post', (method, url, data, callback) => {
   });
-  server.method('req.post', (method, url, data, callback) => {
-    callIt(method, url, data, callback);
+  server.decorate('server', 'req.patch', (method, url, data, callback) => {
+    callIt('patch', url, data, callback);
   });
-  server.method('req.patch', (method, url, data, callback) => {
-    callIt(method, url, data, callback);
-  });
+  */
+  next();
 };
 
 exports.register.attributes = {
-  name: 'request'
+  name: 'hapi-req'
 };
