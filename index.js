@@ -27,22 +27,18 @@ exports.register = function(server, pluginOptions, next) {
     },
     post(url, options, callback) {
       callIt('post', url, options, callback);
+    },
+    put(url, options, callback) {
+      callIt('put', url, options, callback);
+    },
+    delete(url, options, callback) {
+      callIt('delete', url, options, callback);
+    },
+    patch(url, options, callback) {
+      callIt('patch', url, options, callback);
     }
   };
   server.decorate('server', 'req', req);
-  /*
-  server.decorate('server', 'req.delete', (method, url, callback) => {
-    callIt('delete', url, callback);
-  });
-  server.decorate('server', 'req.put', (method, url, data, callback) => {
-    callIt('put', url, data, callback);
-  });
-  server.decorate('server', 'req.post', (method, url, data, callback) => {
-  });
-  server.decorate('server', 'req.patch', (method, url, data, callback) => {
-    callIt('patch', url, data, callback);
-  });
-  */
   next();
 };
 

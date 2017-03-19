@@ -75,4 +75,73 @@ lab.experiment('local', (allDone) => {
       done();
     });
   });
+
+  lab.test('put successfully', (done) => {
+    server.route({
+      path: '/literal',
+      method: 'put',
+      handler(request, reply) {
+        return reply(null, request.payload);
+      }
+    });
+    code.expect(server.req.put).to.exist();
+    server.req.put('literal', { payload: { f: 'true' } }, (err, result) => {
+      code.expect(err).to.equal(null);
+      code.expect(result.f).to.equal('true');
+      done();
+    });
+  });
+
+  lab.test('put failures are handled', (done) => {
+    server.req.put('literal', {}, (err, result) => {
+      code.expect(err).to.not.equal(null);
+      done();
+    });
+  });
+
+  lab.test('deletes successfully', (done) => {
+    server.route({
+      path: '/literal',
+      method: 'delete',
+      handler(request, reply) {
+        return reply(null, { f: 'true' });
+      }
+    });
+    code.expect(server.req.delete).to.exist();
+    server.req.delete('literal', {}, (err, result) => {
+      code.expect(err).to.equal(null);
+      code.expect(result.f).to.equal('true');
+      done();
+    });
+  });
+
+  lab.test('delete failures are handled', (done) => {
+    server.req.delete('literal', {}, (err, result) => {
+      code.expect(err).to.not.equal(null);
+      done();
+    });
+  });
+
+  lab.test('patch successfully', (done) => {
+    server.route({
+      path: '/literal',
+      method: 'patch',
+      handler(request, reply) {
+        return reply(null, request.payload);
+      }
+    });
+    code.expect(server.req.patch).to.exist();
+    server.req.patch('literal', { payload: { f: 'true' } }, (err, result) => {
+      code.expect(err).to.equal(null);
+      code.expect(result.f).to.equal('true');
+      done();
+    });
+  });
+
+  lab.test('patch failures are handled', (done) => {
+    server.req.patch('literal', {}, (err, result) => {
+      code.expect(err).to.not.equal(null);
+      done();
+    });
+  });
 });
