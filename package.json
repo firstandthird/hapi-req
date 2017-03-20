@@ -1,7 +1,6 @@
 {
   "name": "hapi-req",
   "description": "hapi plugin to manage http requests",
-  "private": true,
   "homepage": "https://github.com/firstandthird/hapi-req",
   "author": "First+Third",
   "version": "0.0.1",
