@@ -53,6 +53,38 @@ lab.experiment('local', (allDone) => {
     });
   });
 
+  lab.test('constructs url from  query args correctly', (done) => {
+    server.route({
+      path: '/literal',
+      method: 'get',
+      handler(request, reply) {
+        return reply(null, { result: request.query.value });
+      }
+    });
+    code.expect(server.req.get).to.exist();
+    server.req.get('literal?value=abc', {}, (err, result) => {
+      code.expect(err).to.equal(null);
+      code.expect(result.result).to.equal('abc');
+      done();
+    });
+  });
+
+  lab.test('constructs headers from header args correctly', (done) => {
+    server.route({
+      path: '/literal',
+      method: 'get',
+      handler(request, reply) {
+        return reply(null, { result: request.headers.mine });
+      }
+    });
+    code.expect(server.req.get).to.exist();
+    server.req.get('literal', { headers: { mine: 'header' } }, (err, result) => {
+      code.expect(err).to.equal(null);
+      code.expect(result.result).to.equal('header');
+      done();
+    });
+  });
+
   lab.test('post successfully', (done) => {
     server.route({
       path: '/literal',

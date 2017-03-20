@@ -10,13 +10,14 @@
     "url": "https://github.com/firstandthird/hapi-req.git"
   },
   "scripts": {
-    "test": "lab -e test/test.*.js"
+    "test": "lab -e test"
   },
   "devDependencies": {
     "code": "4.0.0",
     "eslint": "3.17.0",
     "eslint-config-firstandthird": "3.2.0",
     "eslint-plugin-import": "2.2.0",
+    "hapi": "^16.1.0",
     "lab": "12.1.0"
   },
   "dependencies": {

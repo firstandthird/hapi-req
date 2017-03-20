@@ -35,13 +35,9 @@ lab.experiment('remote', (allDone) => {
       }
     });
     code.expect(server.req.get).to.exist();
-    server.req.get('http://localhost:8000/literal', {}, (err, result, payload) => {
-      console.log('+++')
-      console.log(err)
-      console.log(result)
-      console.log(payload)
+    server.req.get('http://localhost:8000/literal', {}, (err, result) => {
       code.expect(err).to.equal(null);
-      code.expect(payload.f).to.equal('true');
+      code.expect(result.f).to.equal('true');
       done();
     });
   });
@@ -52,9 +48,25 @@ lab.experiment('remote', (allDone) => {
       done();
     });
   });
-/*
-  lab.test('post successfully', (done) => {
+
+  lab.test('constructs headers from header args correctly', (done) => {
     server.route({
+      path: '/literal',
+      method: 'get',
+      handler(request, reply) {
+        return reply(null, { result: request.headers.mine });
+      }
+    });
+    code.expect(server.req.get).to.exist();
+    server.req.get('literal', { headers: { mine: 'header' } }, (err, result) => {
+      code.expect(err).to.equal(null);
+      code.expect(result.result).to.equal('header');
+      done();
+    });
+  });
+
+  lab.test('post successfully', (done) => {
+    testServer.route({
       path: '/literal',
       method: 'post',
       handler(request, reply) {
@@ -62,45 +74,44 @@ lab.experiment('remote', (allDone) => {
       }
     });
     code.expect(server.req.post).to.exist();
-    server.req.post('/literal', { payload: { f: 'true' } }, (err, result) => {
+    server.req.post('http://localhost:8000/literal', { payload: { f: 'true' } }, (err, result) => {
       code.expect(err).to.equal(null);
-      code.expect(result.f).to.equal('true');
       done();
     });
   });
 
   lab.test('post failures are handled', (done) => {
-    server.req.post('/literal', {}, (err, result) => {
+    server.req.post('http://localhost:8000/literal', {}, (err, result) => {
       code.expect(err).to.not.equal(null);
       done();
     });
   });
 
   lab.test('put successfully', (done) => {
-    server.route({
+    testServer.route({
       path: '/literal',
       method: 'put',
       handler(request, reply) {
-        return reply(null, request.payload);
+        return reply(null, 'hi');
       }
     });
     code.expect(server.req.put).to.exist();
-    server.req.put('/literal', { payload: { f: 'true' } }, (err, result) => {
+    server.req.put('http://localhost:8000/literal', { payload: { f: 'true' } }, (err, result) => {
       code.expect(err).to.equal(null);
-      code.expect(result.f).to.equal('true');
+      code.expect(result).to.equal('hi');
       done();
     });
   });
 
   lab.test('put failures are handled', (done) => {
-    server.req.put('/literal', {}, (err, result) => {
+    server.req.put('http://localhost:8000/literal', {}, (err, result) => {
       code.expect(err).to.not.equal(null);
       done();
     });
   });
 
   lab.test('deletes successfully', (done) => {
-    server.route({
+    testServer.route({
       path: '/literal',
       method: 'delete',
       handler(request, reply) {
@@ -108,7 +119,7 @@ lab.experiment('remote', (allDone) => {
       }
     });
     code.expect(server.req.delete).to.exist();
-    server.req.delete('/literal', {}, (err, result) => {
+    server.req.delete('http://localhost:8000/literal', {}, (err, result) => {
       code.expect(err).to.equal(null);
       code.expect(result.f).to.equal('true');
       done();
@@ -116,14 +127,14 @@ lab.experiment('remote', (allDone) => {
   });
 
   lab.test('delete failures are handled', (done) => {
-    server.req.delete('/literal', {}, (err, result) => {
+    server.req.delete('http://localhost:8000/literal', {}, (err, result) => {
       code.expect(err).to.not.equal(null);
       done();
     });
   });
 
   lab.test('patch successfully', (done) => {
-    server.route({
+    testServer.route({
       path: '/literal',
       method: 'patch',
       handler(request, reply) {
@@ -131,18 +142,16 @@ lab.experiment('remote', (allDone) => {
       }
     });
     code.expect(server.req.patch).to.exist();
-    server.req.patch('/literal', { payload: { f: 'true' } }, (err, result) => {
+    server.req.patch('http://localhost:8000/literal', { payload: { f: 'true' } }, (err, result) => {
       code.expect(err).to.equal(null);
-      code.expect(result.f).to.equal('true');
       done();
     });
   });
 
   lab.test('patch failures are handled', (done) => {
-    server.req.patch('/literal', {}, (err, result) => {
+    server.req.patch('http://localhost:8000/literal', {}, (err, result) => {
       code.expect(err).to.not.equal(null);
       done();
     });
   });
-*/
 });
