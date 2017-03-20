@@ -45,6 +45,15 @@ lab.experiment('remote', (allDone) => {
   lab.test('get failures are handled', (done) => {
     server.req.get('http://localhost:8000/literal', {}, (err, result) => {
       code.expect(err).to.not.equal(null);
+      code.expect(err.message).to.equal('Not Found');
+      done();
+    });
+  });
+
+  lab.test('get failures are handled', (done) => {
+    server.req.get('http://localhost:8001/literal', {}, (err, result) => {
+      code.expect(err).to.not.equal(null);
+      code.expect(err.message).to.equal('Bad Gateway');
       done();
     });
   });

@@ -10,7 +10,7 @@
     "url": "https://github.com/firstandthird/hapi-req.git"
   },
   "scripts": {
-    "test": "lab -e test"
+    "test": "lab -e test -c "
   },
   "devDependencies": {
     "code": "4.0.0",

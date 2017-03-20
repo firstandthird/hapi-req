@@ -3,20 +3,20 @@ const wreck = require('wreck');
 const Boom = require('boom');
 
 module.exports = (method, url, options, callback) => {
-  const packet = { JSON: true };
+  const packet = { json: 'force' };
   if (options.headers) {
     packet.headers = options.headers;
   }
   if (options.payload) {
     packet.payload = options.payload;
   }
-  return wreck[method](url, options, (err, res, payload) => {
+  return wreck[method](url, packet, (err, res, payload) => {
     if (err) {
       return callback(Boom.create(err.output.statusCode, err.output.payload.error, payload));
     }
     if (res.statusCode !== 200) {
-      return callback(Boom.create(res.statusCode, res.statusMessage, {}));
+      return callback(Boom.create(res.statusCode, res.statusMessage, payload));
     }
-    callback(err, JSON.parse(payload.toString()));
+    callback(err, payload);
   });
 };
