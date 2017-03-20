@@ -21,7 +21,6 @@
   },
   "dependencies": {
     "boom": "~4.2.0",
-    "querystring": "^0.2.0",
     "wreck": "10.0.0"
   },
   "eslintConfig": {
