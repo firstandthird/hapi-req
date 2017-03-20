@@ -39,7 +39,7 @@ lab.experiment('local', (allDone) => {
       }
     });
     code.expect(server.req.get).to.exist();
-    server.req.get('literal', {}, (err, result) => {
+    server.req.get('/literal', {}, (err, result) => {
       code.expect(err).to.equal(null);
       code.expect(result.f).to.equal('true');
       done();
@@ -47,7 +47,7 @@ lab.experiment('local', (allDone) => {
   });
 
   lab.test('get failures are handled', (done) => {
-    server.req.get('literal', {}, (err, result) => {
+    server.req.get('/literal', {}, (err, result) => {
       code.expect(err).to.not.equal(null);
       done();
     });
@@ -62,7 +62,7 @@ lab.experiment('local', (allDone) => {
       }
     });
     code.expect(server.req.get).to.exist();
-    server.req.get('literal?value=abc', {}, (err, result) => {
+    server.req.get('/literal', { query: { value: 'abc' } }, (err, result) => {
       code.expect(err).to.equal(null);
       code.expect(result.result).to.equal('abc');
       done();
@@ -78,7 +78,7 @@ lab.experiment('local', (allDone) => {
       }
     });
     code.expect(server.req.get).to.exist();
-    server.req.get('literal', { headers: { mine: 'header' } }, (err, result) => {
+    server.req.get('/literal', { headers: { mine: 'header' } }, (err, result) => {
       code.expect(err).to.equal(null);
       code.expect(result.result).to.equal('header');
       done();
@@ -94,7 +94,7 @@ lab.experiment('local', (allDone) => {
       }
     });
     code.expect(server.req.post).to.exist();
-    server.req.post('literal', { payload: { f: 'true' } }, (err, result) => {
+    server.req.post('/literal', { payload: { f: 'true' } }, (err, result) => {
       code.expect(err).to.equal(null);
       code.expect(result.f).to.equal('true');
       done();
@@ -102,7 +102,7 @@ lab.experiment('local', (allDone) => {
   });
 
   lab.test('post failures are handled', (done) => {
-    server.req.post('literal', {}, (err, result) => {
+    server.req.post('/literal', {}, (err, result) => {
       code.expect(err).to.not.equal(null);
       done();
     });
@@ -117,7 +117,7 @@ lab.experiment('local', (allDone) => {
       }
     });
     code.expect(server.req.put).to.exist();
-    server.req.put('literal', { payload: { f: 'true' } }, (err, result) => {
+    server.req.put('/literal', { payload: { f: 'true' } }, (err, result) => {
       code.expect(err).to.equal(null);
       code.expect(result.f).to.equal('true');
       done();
@@ -125,7 +125,7 @@ lab.experiment('local', (allDone) => {
   });
 
   lab.test('put failures are handled', (done) => {
-    server.req.put('literal', {}, (err, result) => {
+    server.req.put('/literal', {}, (err, result) => {
       code.expect(err).to.not.equal(null);
       done();
     });
@@ -140,7 +140,7 @@ lab.experiment('local', (allDone) => {
       }
     });
     code.expect(server.req.delete).to.exist();
-    server.req.delete('literal', {}, (err, result) => {
+    server.req.delete('/literal', {}, (err, result) => {
       code.expect(err).to.equal(null);
       code.expect(result.f).to.equal('true');
       done();
@@ -148,7 +148,7 @@ lab.experiment('local', (allDone) => {
   });
 
   lab.test('delete failures are handled', (done) => {
-    server.req.delete('literal', {}, (err, result) => {
+    server.req.delete('/literal', {}, (err, result) => {
       code.expect(err).to.not.equal(null);
       done();
     });
@@ -163,7 +163,7 @@ lab.experiment('local', (allDone) => {
       }
     });
     code.expect(server.req.patch).to.exist();
-    server.req.patch('literal', { payload: { f: 'true' } }, (err, result) => {
+    server.req.patch('/literal', { payload: { f: 'true' } }, (err, result) => {
       code.expect(err).to.equal(null);
       code.expect(result.f).to.equal('true');
       done();
@@ -171,7 +171,7 @@ lab.experiment('local', (allDone) => {
   });
 
   lab.test('patch failures are handled', (done) => {
-    server.req.patch('literal', {}, (err, result) => {
+    server.req.patch('/literal', {}, (err, result) => {
       code.expect(err).to.not.equal(null);
       done();
     });

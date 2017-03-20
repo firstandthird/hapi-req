@@ -50,7 +50,7 @@ lab.experiment('remote', (allDone) => {
   });
 
   lab.test('constructs headers from header args correctly', (done) => {
-    server.route({
+    testServer.route({
       path: '/literal',
       method: 'get',
       handler(request, reply) {
@@ -58,7 +58,7 @@ lab.experiment('remote', (allDone) => {
       }
     });
     code.expect(server.req.get).to.exist();
-    server.req.get('literal', { headers: { mine: 'header' } }, (err, result) => {
+    server.req.get('http://localhost:8000/literal', { headers: { mine: 'header' } }, (err, result) => {
       code.expect(err).to.equal(null);
       code.expect(result.result).to.equal('header');
       done();
@@ -92,13 +92,13 @@ lab.experiment('remote', (allDone) => {
       path: '/literal',
       method: 'put',
       handler(request, reply) {
-        return reply(null, 'hi');
+        return reply(null, { result: 'hi' });
       }
     });
     code.expect(server.req.put).to.exist();
     server.req.put('http://localhost:8000/literal', { payload: { f: 'true' } }, (err, result) => {
       code.expect(err).to.equal(null);
-      code.expect(result).to.equal('hi');
+      code.expect(result.result).to.equal('hi');
       done();
     });
   });
@@ -121,7 +121,6 @@ lab.experiment('remote', (allDone) => {
     code.expect(server.req.delete).to.exist();
     server.req.delete('http://localhost:8000/literal', {}, (err, result) => {
       code.expect(err).to.equal(null);
-      code.expect(result.f).to.equal('true');
       done();
     });
   });

@@ -1,25 +1,19 @@
 'use strict';
 const local = require('./inject.js');
 const remote = require('./request.js');
+const querystring = require('querystring');
 
 exports.register = function(server, pluginOptions, next) {
   const callIt = (method, url, options, callback) => {
     Object.assign(options, pluginOptions);
     // construct url from any relevant options:
     if (options.query) {
-      const queries = [];
-      Object.keys(options.query).forEach((queryKey) => {
-        queries.push(`${queryKey}=${options.query[queryKey]}`);
-      });
-      url += `?${queries.join('&')}`;
+      url += `?${querystring.stringify(options.query)}`;
     }
-    // todo: headers
-    // if (options.headers) {
-    // }
-    if (url[0] === '/' || url.split('://')[0] === 'http') {
-      return remote(method, url, options, callback);
+    if (url[0] === '/') {
+      return local(server, method, url, options, callback);
     }
-    return local(server, method, `/${url}`, options, callback);
+    return remote(method, url, options, callback);
   };
   const req = {
     get(url, options, callback) {
