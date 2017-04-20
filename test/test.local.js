@@ -108,6 +108,22 @@ lab.experiment('local', (allDone) => {
     });
   });
 
+  lab.test('parse failures are handled', (done) => {
+    server.route({
+      path: '/literal',
+      method: 'post',
+      handler(request, reply) {
+        return reply(null, 'not json');
+      }
+    });
+    code.expect(server.req.post).to.exist();
+    server.req.post('/literal', { payload: { t: true } }, (err, result) => {
+      code.expect(err).to.not.equal(null);
+      code.expect(err.output.payload.message).to.equal('returned payload was not valid JSON');
+      done();
+    });
+  });
+
   lab.test('put successfully', (done) => {
     server.route({
       path: '/literal',
