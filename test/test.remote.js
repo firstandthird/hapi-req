@@ -162,4 +162,70 @@ lab.experiment('remote', (allDone) => {
       done();
     });
   });
+
+  lab.test('timeout after 5 seconds by default', { timeout: 10000 }, (done) => {
+    testServer.route({
+      path: '/literal',
+      method: 'get',
+      handler(request, reply) {
+        setTimeout(() => reply(null, {}), 6000);
+      }
+    });
+    server.req.get('http://localhost:8000/literal', {}, (err, result) => {
+      code.expect(err).to.not.equal(null);
+      done();
+    });
+  });
+});
+
+
+lab.experiment('remote', (allDone) => {
+  lab.beforeEach((done) => {
+    testServer = new hapi.Server();
+    testServer.connection({ port: 8000 });
+    server = new hapi.Server();
+    server.connection({ port: 9000 });
+    server.register({
+      register: hapiReq,
+      options: {
+        timeout: 7000
+      }
+    }, () => {
+      testServer.start(() => {
+        server.start(done);
+      });
+    });
+  });
+  lab.afterEach((done) => {
+    testServer.stop(() => {
+      server.stop(done);
+    });
+  });
+  lab.test('can set timeout option', { timeout: 10000 }, (done) => {
+    testServer.route({
+      path: '/literal',
+      method: 'get',
+      handler(request, reply) {
+        setTimeout(() => reply(null, {}), 6000);
+      }
+    });
+    server.req.get('http://localhost:8000/literal', {}, (err, result) => {
+      code.expect(err).to.equal(null);
+      done();
+    });
+  });
+  lab.test('timeout after 5 seconds by default', { timeout: 10000 }, (done) => {
+    testServer.route({
+      path: '/literal',
+      method: 'get',
+      handler(request, reply) {
+        setTimeout(() => reply(null, {}), 7100);
+      }
+    });
+    server.req.get('http://localhost:8000/literal', {}, (err, result) => {
+      code.expect(err).to.not.equal(null);
+      done();
+    });
+  });
+
 });

@@ -10,6 +10,7 @@ module.exports = (method, url, options, callback) => {
   if (options.payload) {
     packet.payload = options.payload;
   }
+  packet.timeout = options.timeout || 5000;
   return wreck[method](url, packet, (err, res, payload) => {
     if (err) {
       return callback(Boom.create(err.output.statusCode, err.output.payload.error, payload));
