@@ -15,10 +15,12 @@ module.exports = (server, method, url, options, done) => {
     if (res.statusCode !== 200) {
       return done(Boom.create(res.statusCode, res.statusMessage, res.payload));
     }
+    let out = null;
     try {
-      return done(null, JSON.parse(res.payload));
+      out = JSON.parse(res.payload);
     } catch (e) {
       return done(Boom.badRequest('returned payload was not valid JSON', res.payload));
     }
+    done(null, out);
   });
 };
