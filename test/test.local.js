@@ -193,3 +193,42 @@ lab.experiment('local', (allDone) => {
     });
   });
 });
+
+lab.experiment('local', (allDone) => {
+  lab.beforeEach((done) => {
+    testServer = new hapi.Server();
+    testServer.connection({ port: 8000 });
+    server = new hapi.Server();
+    server.connection({ port: 9000 });
+    server.register({
+      register: hapiReq,
+      options: {
+        injectPrefix: '/api'
+      }
+    }, () => {
+      server.route({
+        path: '/api/literal',
+        method: 'get',
+        handler(request, reply) {
+          return reply(null, { f: 'true' });
+        }
+      });
+      testServer.start(() => {
+        server.start(done);
+      });
+    });
+  });
+
+  lab.afterEach((done) => {
+    testServer.stop(() => {
+      server.stop(done);
+    });
+  });
+
+  lab.test('loads', (done) => {
+    server.req.get('literal', {}, (err, result) => {
+      code.expect(err).to.equal(null);
+      done();
+    });
+  });
+});

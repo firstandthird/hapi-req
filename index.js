@@ -6,6 +6,9 @@ const querystring = require('querystring');
 exports.register = function(server, pluginOptions, next) {
   const callIt = (method, url, options, callback) => {
     Object.assign(options, pluginOptions);
+    if (options.injectPrefix) {
+      url = `${options.injectPrefix}/${url}`;
+    }
     // construct url from any relevant options:
     if (options.query) {
       url += `?${querystring.stringify(options.query)}`;

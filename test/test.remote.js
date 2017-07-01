@@ -178,7 +178,6 @@ lab.experiment('remote', (allDone) => {
   });
 });
 
-
 lab.experiment('remote', (allDone) => {
   lab.beforeEach((done) => {
     testServer = new hapi.Server();
@@ -227,5 +226,41 @@ lab.experiment('remote', (allDone) => {
       done();
     });
   });
+});
 
+lab.experiment('remote', (allDone) => {
+  lab.beforeEach((done) => {
+    testServer = new hapi.Server();
+    testServer.connection({ port: 8000 });
+    testServer.route({
+      path: '/literal',
+      method: 'get',
+      handler(request, reply) {
+        return reply(null, { f: 'true' });
+      }
+    });
+    server = new hapi.Server();
+    server.connection({ port: 9000 });
+    server.register({
+      register: hapiReq,
+      options: {
+        injectPrefix: 'http://localhost:8000'
+      }
+    }, () => {
+      testServer.start(() => {
+        server.start(done);
+      });
+    });
+  });
+  lab.afterEach((done) => {
+    testServer.stop(() => {
+      server.stop(done);
+    });
+  });
+  lab.test('can set prefix option', (done) => {
+    server.req.get('literal', {}, (err, result) => {
+      code.expect(err).to.equal(null);
+      done();
+    });
+  });
 });
