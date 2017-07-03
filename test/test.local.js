@@ -226,7 +226,7 @@ lab.experiment('local', (allDone) => {
   });
 
   lab.test('loads', (done) => {
-    server.req.get('literal', {}, (err, result) => {
+    server.req.get('/literal', {}, (err, result) => {
       code.expect(err).to.equal(null);
       done();
     });

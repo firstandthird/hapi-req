@@ -1,6 +1,9 @@
 'use strict';
 const Boom = require('boom');
 module.exports = (server, method, url, options, done) => {
+  if (options.injectPrefix) {
+    url = `${options.injectPrefix}${url}`;
+  }
   const packet = {
     method,
     url
@@ -11,6 +14,7 @@ module.exports = (server, method, url, options, done) => {
   if (options.headers) {
     packet.headers = options.headers;
   }
+
   server.inject(packet, (res) => {
     if (res.statusCode !== 200) {
       return done(Boom.create(res.statusCode, res.statusMessage, res.payload));

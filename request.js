@@ -1,8 +1,17 @@
 'use strict';
 const wreck = require('wreck');
 const Boom = require('boom');
+const URL = require('url');
 
 module.exports = (method, url, options, callback) => {
+  if (options.injectPrefix) {
+    const parsedUrl = URL.parse(url);
+    const path = parsedUrl.path;
+    parsedUrl.path = `${options.injectPrefix}${path}`;
+    parsedUrl.pathname = `${options.injectPrefix}${path}`;
+    url = URL.format(parsedUrl);
+  }
+
   const packet = { json: 'force' };
   if (options.headers) {
     packet.headers = options.headers;

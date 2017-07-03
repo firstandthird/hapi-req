@@ -233,7 +233,7 @@ lab.experiment('remote', (allDone) => {
     testServer = new hapi.Server();
     testServer.connection({ port: 8000 });
     testServer.route({
-      path: '/literal',
+      path: '/api/literal',
       method: 'get',
       handler(request, reply) {
         return reply(null, { f: 'true' });
@@ -244,7 +244,7 @@ lab.experiment('remote', (allDone) => {
     server.register({
       register: hapiReq,
       options: {
-        injectPrefix: 'http://localhost:8000'
+        injectPrefix: '/api'
       }
     }, () => {
       testServer.start(() => {
@@ -258,7 +258,7 @@ lab.experiment('remote', (allDone) => {
     });
   });
   lab.test('can set prefix option', (done) => {
-    server.req.get('literal', {}, (err, result) => {
+    server.req.get('http://localhost:8000/literal', {}, (err, result) => {
       code.expect(err).to.equal(null);
       done();
     });
