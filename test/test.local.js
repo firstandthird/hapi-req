@@ -203,7 +203,7 @@ lab.experiment('local', (allDone) => {
     server.register({
       register: hapiReq,
       options: {
-        injectPrefix: '/api'
+        localPrefix: '/api'
       }
     }, () => {
       server.route({
@@ -225,7 +225,7 @@ lab.experiment('local', (allDone) => {
     });
   });
 
-  lab.test('loads', (done) => {
+  lab.test('localPrefix plugin option', (done) => {
     server.req.get('/literal', {}, (err, result) => {
       code.expect(err).to.equal(null);
       done();

@@ -11,6 +11,9 @@ exports.register = function(server, pluginOptions, next) {
       url += `?${querystring.stringify(options.query)}`;
     }
     if (url[0] === '/') {
+      if (pluginOptions.localPrefix) {
+        url = `${pluginOptions.localPrefix}${url}`;
+      }
       return local(server, method, url, options, callback);
     }
     return remote(method, url, options, callback);
