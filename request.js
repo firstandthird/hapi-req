@@ -1,10 +1,8 @@
 'use strict';
 const wreck = require('wreck');
 const Boom = require('boom');
-const URL = require('url');
 
 module.exports = (method, url, options, callback) => {
-
   const packet = { json: 'force' };
   if (options.headers) {
     packet.headers = options.headers;
