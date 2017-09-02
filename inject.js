@@ -14,7 +14,7 @@ module.exports = (server, method, url, options, done) => {
 
   server.inject(packet, (res) => {
     if (res.statusCode !== 200) {
-      return done(Boom.create(res.statusCode, res.statusMessage, res.payload));
+      return done(Boom.create(res.statusCode, res.payload.message || res.statusMessage, res.payload));
     }
     let out = null;
     try {
