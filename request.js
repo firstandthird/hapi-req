@@ -17,7 +17,7 @@ module.exports = (method, url, options, callback) => {
       return callback(Boom.create(err.output.statusCode, err.output.payload.error, payload));
     }
     if (res.statusCode !== 200) {
-      return callback(Boom.create(res.statusCode, payload.message || res.statusMessage, payload));
+      return callback(Boom.create(res.statusCode, (payload ? payload.message : false) || res.statusMessage, payload));
     }
     callback(err, payload);
   });
