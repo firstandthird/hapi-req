@@ -66,7 +66,7 @@ lab.experiment('local', (allDone) => {
       code.expect(result).to.not.equal(null);
       code.expect(result.result.statusCode).to.equal(200);
       code.expect(result.result.headers).to.not.equal(null);
-      code.expect(JSON.parse(result.payload).f).to.equal('true');
+      code.expect(result.payload.f).to.equal('true');
       done();
     });
   });
