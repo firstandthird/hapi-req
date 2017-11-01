@@ -14,7 +14,11 @@ module.exports = (method, url, options, callback) => {
 
   return wreck[method](url, packet, (err, res, payload) => {
     if (err) {
-      return callback(Boom.create(err.output.statusCode, err.output.payload.error, payload));
+      if (err.output) {
+        return callback(Boom.create(err.output.statusCode, err.output.payload.error, payload));
+      }
+      // an error with no Boom status code consider a server error:
+      return callback(Boom.create(500, 'Server Error', payload));
     }
     if (res.statusCode !== 200) {
       return callback(Boom.create(res.statusCode, (payload ? payload.message : false) || res.statusMessage, payload));
