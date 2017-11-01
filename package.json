@@ -9,7 +9,7 @@
     "url": "https://github.com/firstandthird/hapi-req.git"
   },
   "scripts": {
-    "test": "lab -e test -c "
+    "test": "lab --leaks -e test -c "
   },
   "devDependencies": {
     "code": "4.0.0",

@@ -22,6 +22,9 @@ module.exports = (server, method, url, options, done) => {
     } catch (e) {
       return done(Boom.badRequest('returned payload was not valid JSON', res.payload));
     }
+    if (options.returnResponse) {
+      return done(null, { result: res, payload: out });
+    }
     done(null, out);
   });
 };

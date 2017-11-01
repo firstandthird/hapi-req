@@ -200,6 +200,7 @@ lab.experiment('remote', (allDone) => {
       server.stop(done);
     });
   });
+
   lab.test('can set timeout option', { timeout: 10000 }, (done) => {
     testServer.route({
       path: '/literal',
@@ -223,6 +224,24 @@ lab.experiment('remote', (allDone) => {
     });
     server.req.get('http://localhost:8000/literal', {}, (err, result) => {
       code.expect(err).to.not.equal(null);
+      done();
+    });
+  });
+
+  lab.test('support option to get back response object', (done) => {
+    testServer.route({
+      path: '/literal',
+      method: 'get',
+      handler(request, reply) {
+        reply(null, { result: true });
+      }
+    });
+    server.req.get('http://localhost:8000/literal', { returnResponse: true }, (err, result) => {
+      code.expect(err).to.equal(null);
+      code.expect(result).to.not.equal(null);
+      code.expect(result.result.statusCode).to.equal(200);
+      code.expect(result.result.headers).to.not.equal(null);
+      code.expect(result.payload.result).to.equal(true);
       done();
     });
   });
