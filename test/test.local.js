@@ -53,6 +53,24 @@ lab.experiment('local', (allDone) => {
     });
   });
 
+  lab.test('support option to get back response object', (done) => {
+    server.route({
+      path: '/literal',
+      method: 'get',
+      handler(request, reply) {
+        return reply(null, { f: 'true' });
+      }
+    });
+    server.req.get('/literal', { returnResponse: true }, (err, result) => {
+      code.expect(err).to.equal(null);
+      code.expect(result).to.not.equal(null);
+      code.expect(result.result.statusCode).to.equal(200);
+      code.expect(result.result.headers).to.not.equal(null);
+      code.expect(JSON.parse(result.payload).f).to.equal('true');
+      done();
+    });
+  });
+
   lab.test('constructs url from  query args correctly', (done) => {
     server.route({
       path: '/literal',
