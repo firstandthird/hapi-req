@@ -19,11 +19,11 @@ module.exports = async(server, method, url, options) => {
   let out = null;
   try {
     out = JSON.parse(res.payload);
+    if (options.returnResponse) {
+      return { result: res, payload: out };
+    }
+    return out;
   } catch (e) {
     return Boom.badRequest('returned payload was not valid JSON', res.payload);
   }
-  if (options.returnResponse) {
-    return { result: res, payload: out };
-  }
-  return out;
 };

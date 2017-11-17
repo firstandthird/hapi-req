@@ -21,10 +21,6 @@ lab.experiment('local', async() => {
     await server.stop();
   });
 
-  lab.test('loads', (done) => {
-    done();
-  });
-
   lab.test('gets successfully', async() => {
     server.route({
       path: '/literal',

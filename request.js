@@ -2,7 +2,7 @@
 const wreck = require('wreck');
 const Boom = require('boom');
 
-module.exports = (method, url, options, callback) => {
+module.exports = async (method, url, options) => {
   const packet = { json: 'force' };
   if (options.headers) {
     packet.headers = options.headers;
@@ -11,16 +11,16 @@ module.exports = (method, url, options, callback) => {
     packet.payload = options.payload;
   }
   packet.timeout = options.timeout || 5000;
-  return wreck[method](url, packet, (err, res, payload) => {
-    if (err) {
-      return callback(Boom.create(err.output.statusCode, err.output.payload.error, payload));
-    }
+  try {
+    const { res, payload } = await wreck[method](url, packet);
     if (options.returnResponse) {
-      return callback(null, { result: res, payload });
+      return { result: res, payload };
     }
     if (res.statusCode !== 200) {
-      return callback(Boom.create(res.statusCode, (payload ? payload.message : false) || res.statusMessage, payload));
+      return Boom.create(res.statusCode, (payload ? payload.message : false) || res.statusMessage, payload);
     }
-    callback(err, payload);
-  });
+    return payload;
+  } catch (err) {
+    return Boom.create(err.output.statusCode, err.output.payload.error);
+  }
 };
