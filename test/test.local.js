@@ -7,246 +7,215 @@ const hapiReq = require('../index.js');
 let testServer;
 let server;
 
-lab.experiment('local', (allDone) => {
-  lab.beforeEach((done) => {
-    testServer = new hapi.Server();
-    testServer.connection({ port: 8000 });
-    server = new hapi.Server();
-    server.connection({ port: 9000 });
-    server.register(hapiReq, () => {
-      testServer.start(() => {
-        server.start(done);
-      });
-    });
+lab.experiment('local', async() => {
+  lab.beforeEach(async () => {
+    testServer = new hapi.Server({ port: 8000 });
+    server = new hapi.Server({ port: 9000 });
+    await server.register(hapiReq);
+    await testServer.start();
+    await server.start();
   });
 
-  lab.afterEach((done) => {
-    testServer.stop(() => {
-      server.stop(done);
-    });
+  lab.afterEach(async () => {
+    await testServer.stop();
+    await server.stop();
   });
 
   lab.test('loads', (done) => {
     done();
   });
 
-  lab.test('gets successfully', (done) => {
+  lab.test('gets successfully', async() => {
     server.route({
       path: '/literal',
       method: 'get',
-      handler(request, reply) {
-        return reply(null, { f: 'true' });
+      handler(request, h) {
+        return { f: 'true' };
       }
     });
     code.expect(server.req.get).to.exist();
-    server.req.get('/literal', {}, (err, result) => {
-      code.expect(err).to.equal(null);
-      code.expect(result.f).to.equal('true');
-      done();
-    });
+    const result = await server.req.get('/literal', {});
+    code.expect(result.f).to.equal('true');
   });
 
-  lab.test('get failures are handled', (done) => {
-    server.req.get('/literal', {}, (err, result) => {
+  lab.test('get failures are handled', async () => {
+    try {
+      const result = await server.req.get('/literal', {});
+    } catch (err) {
       code.expect(err).to.not.equal(null);
-      done();
-    });
+    }
   });
 
-  lab.test('support option to get back response object', (done) => {
+  lab.test('support option to get back response object', async () => {
     server.route({
       path: '/literal',
       method: 'get',
-      handler(request, reply) {
-        return reply(null, { f: 'true' });
+      handler(request, h) {
+        return { f: 'true' };
       }
     });
-    server.req.get('/literal', { returnResponse: true }, (err, result) => {
-      code.expect(err).to.equal(null);
-      code.expect(result).to.not.equal(null);
-      code.expect(result.result.statusCode).to.equal(200);
-      code.expect(result.result.headers).to.not.equal(null);
-      code.expect(result.payload.f).to.equal('true');
-      done();
-    });
+    const result = await server.req.get('/literal', { returnResponse: true });
+    code.expect(result).to.not.equal(null);
+    code.expect(result.result.statusCode).to.equal(200);
+    code.expect(result.result.headers).to.not.equal(null);
+    code.expect(result.payload.f).to.equal('true');
   });
 
-  lab.test('constructs url from  query args correctly', (done) => {
+  lab.test('constructs url from  query args correctly', async () => {
     server.route({
       path: '/literal',
       method: 'get',
-      handler(request, reply) {
-        return reply(null, { result: request.query.value });
+      handler(request, h) {
+        return { result: request.query.value };
       }
     });
     code.expect(server.req.get).to.exist();
-    server.req.get('/literal', { query: { value: 'abc' } }, (err, result) => {
-      code.expect(err).to.equal(null);
-      code.expect(result.result).to.equal('abc');
-      done();
-    });
+    const result = await server.req.get('/literal', { query: { value: 'abc' } });
+    code.expect(result.result).to.equal('abc');
   });
 
-  lab.test('constructs headers from header args correctly', (done) => {
+  lab.test('constructs headers from header args correctly', async () => {
     server.route({
       path: '/literal',
       method: 'get',
-      handler(request, reply) {
-        return reply(null, { result: request.headers.mine });
+      handler(request, h) {
+        return { result: request.headers.mine };
       }
     });
     code.expect(server.req.get).to.exist();
-    server.req.get('/literal', { headers: { mine: 'header' } }, (err, result) => {
-      code.expect(err).to.equal(null);
-      code.expect(result.result).to.equal('header');
-      done();
-    });
+    const result = await server.req.get('/literal', { headers: { mine: 'header' } });
+    code.expect(result.result).to.equal('header');
   });
 
-  lab.test('post successfully', (done) => {
+  lab.test('post successfully', async () => {
     server.route({
       path: '/literal',
       method: 'post',
-      handler(request, reply) {
-        return reply(null, request.payload);
+      handler(request, h) {
+        return request.payload;
       }
     });
     code.expect(server.req.post).to.exist();
-    server.req.post('/literal', { payload: { f: 'true' } }, (err, result) => {
-      code.expect(err).to.equal(null);
-      code.expect(result.f).to.equal('true');
-      done();
-    });
+    const result = await server.req.post('/literal', { payload: { f: 'true' } });
+    code.expect(result.f).to.equal('true');
   });
 
-  lab.test('post failures are handled', (done) => {
-    server.req.post('/literal', {}, (err, result) => {
+  lab.test('post failures are handled', async () => {
+    try {
+      const result = await server.req.post('/literal', {});
+    } catch (err) {
       code.expect(err).to.not.equal(null);
-      done();
-    });
+    }
   });
 
-  lab.test('parse failures are handled', (done) => {
+  lab.test('parse failures are handled', async() => {
     server.route({
       path: '/literal',
       method: 'post',
-      handler(request, reply) {
-        return reply(null, 'not json');
+      handler(request, h) {
+        return 'not json';
       }
     });
     code.expect(server.req.post).to.exist();
-    server.req.post('/literal', { payload: { t: true } }, (err, result) => {
+    try {
+      const result = await server.req.post('/literal', { payload: { t: true } });
+    } catch (err) {
       code.expect(err).to.not.equal(null);
       code.expect(err.output.payload.message).to.equal('returned payload was not valid JSON');
-      done();
-    });
+    }
   });
 
-  lab.test('put successfully', (done) => {
+  lab.test('put successfully', async () => {
     server.route({
       path: '/literal',
       method: 'put',
-      handler(request, reply) {
-        return reply(null, request.payload);
+      handler(request, h) {
+        return request.payload;
       }
     });
     code.expect(server.req.put).to.exist();
-    server.req.put('/literal', { payload: { f: 'true' } }, (err, result) => {
-      code.expect(err).to.equal(null);
-      code.expect(result.f).to.equal('true');
-      done();
-    });
+    const result = await server.req.put('/literal', { payload: { f: 'true' } });
+    code.expect(result.f).to.equal('true');
   });
 
-  lab.test('put failures are handled', (done) => {
-    server.req.put('/literal', {}, (err, result) => {
+  lab.test('put failures are handled', async () => {
+    try {
+      const result = await server.req.put('/literal', {});
+    } catch (err) {
       code.expect(err).to.not.equal(null);
-      done();
-    });
+    }
   });
 
-  lab.test('deletes successfully', (done) => {
+  lab.test('deletes successfully', async() => {
     server.route({
       path: '/literal',
       method: 'delete',
-      handler(request, reply) {
-        return reply(null, { f: 'true' });
+      handler(request, h) {
+        return { f: 'true' };
       }
     });
     code.expect(server.req.delete).to.exist();
-    server.req.delete('/literal', {}, (err, result) => {
-      code.expect(err).to.equal(null);
-      code.expect(result.f).to.equal('true');
-      done();
-    });
+    const result = await server.req.delete('/literal', {});
+    code.expect(result.f).to.equal('true');
   });
 
-  lab.test('delete failures are handled', (done) => {
-    server.req.delete('/literal', {}, (err, result) => {
+  lab.test('delete failures are handled', async() => {
+    try {
+      await server.req.delete('/literal', {});
+    } catch (err) {
       code.expect(err).to.not.equal(null);
-      done();
-    });
+    }
   });
 
-  lab.test('patch successfully', (done) => {
+  lab.test('patch successfully', async() => {
     server.route({
       path: '/literal',
       method: 'patch',
-      handler(request, reply) {
-        return reply(null, request.payload);
+      handler(request, h) {
+        return request.payload;
       }
     });
     code.expect(server.req.patch).to.exist();
-    server.req.patch('/literal', { payload: { f: 'true' } }, (err, result) => {
-      code.expect(err).to.equal(null);
-      code.expect(result.f).to.equal('true');
-      done();
-    });
+    const result = await server.req.patch('/literal', { payload: { f: 'true' } });
+    code.expect(result.f).to.equal('true');
   });
 
-  lab.test('patch failures are handled', (done) => {
-    server.req.patch('/literal', {}, (err, result) => {
+  lab.test('patch failures are handled', async() => {
+    try {
+      await server.req.patch('/literal', {});
+    } catch (err) {
       code.expect(err).to.not.equal(null);
-      done();
-    });
+    }
   });
 });
 
-lab.experiment('local', (allDone) => {
-  lab.beforeEach((done) => {
-    testServer = new hapi.Server();
-    testServer.connection({ port: 8000 });
-    server = new hapi.Server();
-    server.connection({ port: 9000 });
-    server.register({
-      register: hapiReq,
+lab.experiment('local', async () => {
+  lab.beforeEach(async () => {
+    testServer = new hapi.Server({ port: 8000 });
+    server = new hapi.Server({ port: 9000 });
+    const response = await server.register({
+      plugin: hapiReq,
       options: {
         localPrefix: '/api'
       }
-    }, () => {
-      server.route({
-        path: '/api/literal',
-        method: 'get',
-        handler(request, reply) {
-          return reply(null, { f: 'true' });
-        }
-      });
-      testServer.start(() => {
-        server.start(done);
-      });
     });
+    server.route({
+      path: '/api/literal',
+      method: 'get',
+      handler(request, h) {
+        return { f: 'true' };
+      }
+    });
+    await testServer.start();
+    await server.start();
   });
 
-  lab.afterEach((done) => {
-    testServer.stop(() => {
-      server.stop(done);
-    });
+  lab.afterEach(async() => {
+    await testServer.stop();
+    await server.stop();
   });
 
-  lab.test('localPrefix plugin option', (done) => {
-    server.req.get('/literal', {}, (err, result) => {
-      code.expect(err).to.equal(null);
-      done();
-    });
+  lab.test('localPrefix plugin option', async () => {
+    const result = await server.req.get('/literal', {});
   });
 });

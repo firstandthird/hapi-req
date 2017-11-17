@@ -16,12 +16,12 @@
     "eslint": "3.17.0",
     "eslint-config-firstandthird": "3.2.0",
     "eslint-plugin-import": "2.2.0",
-    "hapi": "^16.1.0",
-    "lab": "12.1.0"
+    "hapi": "^17.0.1",
+    "lab": "^15.1.2"
   },
   "dependencies": {
     "boom": "~4.2.0",
-    "wreck": "10.0.0"
+    "wreck": "^14.0.2"
   },
   "eslintConfig": {
     "extends": "firstandthird",
