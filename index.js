@@ -3,8 +3,8 @@ const local = require('./inject.js');
 const remote = require('./request.js');
 const querystring = require('querystring');
 
-exports.register = function(server, pluginOptions, next) {
-  const callIt = (method, url, options, callback) => {
+const register = async function(server, pluginOptions) {
+  const callIt = async (method, url, options) => {
     Object.assign(options, pluginOptions);
     // construct url from any relevant options:
     if (options.query) {
@@ -14,31 +14,32 @@ exports.register = function(server, pluginOptions, next) {
       if (pluginOptions.localPrefix) {
         url = `${pluginOptions.localPrefix}${url}`;
       }
-      return local(server, method, url, options, callback);
+      return await local(server, method, url, options);
     }
-    return remote(method, url, options, callback);
+    return await remote(method, url, options);
   };
   const req = {
-    get(url, options, callback) {
-      callIt('get', url, options, callback);
+    get: async (url, options) => {
+      return await callIt('get', url, options);
     },
-    post(url, options, callback) {
-      callIt('post', url, options, callback);
+    post: async (url, options) => {
+      return await callIt('post', url, options);
     },
-    put(url, options, callback) {
-      callIt('put', url, options, callback);
+    put: async (url, options) => {
+      return await callIt('put', url, options);
     },
-    delete(url, options, callback) {
-      callIt('delete', url, options, callback);
+    delete: async (url, options) => {
+      return await callIt('delete', url, options);
     },
-    patch(url, options, callback) {
-      callIt('patch', url, options, callback);
+    patch: async (url, options) => {
+      return await callIt('patch', url, options);
     }
   };
   server.decorate('server', 'req', req);
-  next();
 };
 
-exports.register.attributes = {
-  name: 'hapi-req'
+exports.plugin = {
+  once: true,
+  pkg: require('./package.json'),
+  register
 };

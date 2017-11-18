@@ -1,6 +1,6 @@
 'use strict';
 const Boom = require('boom');
-module.exports = (server, method, url, options, done) => {
+module.exports = async(server, method, url, options) => {
   const packet = {
     method,
     url
@@ -12,19 +12,18 @@ module.exports = (server, method, url, options, done) => {
     packet.headers = options.headers;
   }
 
-  server.inject(packet, (res) => {
-    if (res.statusCode !== 200) {
-      return done(Boom.create(res.statusCode, res.payload.message || res.statusMessage, res.payload));
-    }
-    let out = null;
-    try {
-      out = JSON.parse(res.payload);
-    } catch (e) {
-      return done(Boom.badRequest('returned payload was not valid JSON', res.payload));
-    }
+  const res = await server.inject(packet);
+  if (res.statusCode !== 200) {
+    return Boom.create(res.statusCode, res.payload.message || res.statusMessage, res.payload);
+  }
+  let out = null;
+  try {
+    out = JSON.parse(res.payload);
     if (options.returnResponse) {
-      return done(null, { result: res, payload: out });
+      return { result: res, payload: out };
     }
-    done(null, out);
-  });
+    return out;
+  } catch (e) {
+    return Boom.badRequest('returned payload was not valid JSON', res.payload);
+  }
 };
