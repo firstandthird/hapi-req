@@ -1,4 +1,3 @@
-'use strict';
 const hapi = require('hapi');
 const Lab = require('lab');
 const lab = exports.lab = Lab.script();
@@ -45,8 +44,8 @@ lab.experiment('remote', (allDone) => {
 
   lab.test('get failures are handled', async () => {
     try {
-      const result = await server.req.get('http://localhost:8001/literal', {});
-    } catch (e) {
+      await server.req.get('http://localhost:8001/literal', {});
+    } catch (err) {
       code.expect(err).to.not.equal(null);
       code.expect(err.message).to.equal('Bad Gateway');
     }
@@ -74,12 +73,12 @@ lab.experiment('remote', (allDone) => {
       }
     });
     code.expect(server.req.post).to.exist();
-    const result = await server.req.post('http://localhost:8000/literal', { payload: { f: 'true' } });
+    await server.req.post('http://localhost:8000/literal', { payload: { f: 'true' } });
   });
 
   lab.test('post failures are handled', async() => {
     try {
-      const result = await server.req.post('http://localhost:8000/literal', {});
+      await server.req.post('http://localhost:8000/literal', {});
     } catch (err) {
       code.expect(err).to.not.equal(null);
     }
@@ -100,7 +99,7 @@ lab.experiment('remote', (allDone) => {
 
   lab.test('put failures are handled', async () => {
     try {
-      const result = await server.req.put('http://localhost:8000/literal', {});
+      await server.req.put('http://localhost:8000/literal', {});
     } catch (err) {
       code.expect(err).to.not.equal(null);
     }
@@ -115,10 +114,10 @@ lab.experiment('remote', (allDone) => {
       }
     });
     code.expect(server.req.delete).to.exist();
-    const result = await server.req.delete('http://localhost:8000/literal', {});
+    await server.req.delete('http://localhost:8000/literal', {});
   });
 
-  lab.test('delete failures are handled', async() => {
+  lab.test('delete failures are handled', () => {
     try {
       server.req.delete('http://localhost:8000/literal', {});
     } catch (err) {
@@ -135,12 +134,12 @@ lab.experiment('remote', (allDone) => {
       }
     });
     code.expect(server.req.patch).to.exist();
-    const result = await server.req.patch('http://localhost:8000/literal', { payload: { f: 'true' } });
+    await server.req.patch('http://localhost:8000/literal', { payload: { f: 'true' } });
   });
 
   lab.test('patch failures are handled', async() => {
     try {
-      const result = await server.req.patch('http://localhost:8000/literal', {});
+      await server.req.patch('http://localhost:8000/literal', {});
     } catch (err) {
       code.expect(err).to.not.equal(null);
     }
@@ -192,9 +191,9 @@ lab.experiment('remote', (allDone) => {
         return {};
       }
     });
-    const result = await server.req.get('http://localhost:8000/literal', {});
+    await server.req.get('http://localhost:8000/literal', {});
   });
-  lab.test('timeout after 5 seconds by default', { timeout: 10000 }, async() => {
+  lab.test('timeout after 5 seconds by default', { timeout: 10000 }, () => {
     testServer.route({
       path: '/literal',
       method: 'get',
@@ -215,9 +214,7 @@ lab.experiment('remote', (allDone) => {
     testServer.route({
       path: '/literal',
       method: 'get',
-      handler: async(request, h) => {
-        return { result: true };
-      }
+      handler: (request, h) => ({ result: true })
     });
     const result = await server.req.get('http://localhost:8000/literal', { returnResponse: true });
     code.expect(result).to.not.equal(null);

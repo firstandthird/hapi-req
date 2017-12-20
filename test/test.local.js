@@ -1,4 +1,3 @@
-'use strict';
 const hapi = require('hapi');
 const Lab = require('lab');
 const lab = exports.lab = Lab.script();
@@ -7,7 +6,7 @@ const hapiReq = require('../index.js');
 let testServer;
 let server;
 
-lab.experiment('local', async() => {
+lab.experiment('local', () => {
   lab.beforeEach(async () => {
     testServer = new hapi.Server({ port: 8000 });
     server = new hapi.Server({ port: 9000 });
@@ -36,7 +35,7 @@ lab.experiment('local', async() => {
 
   lab.test('get failures are handled', async () => {
     try {
-      const result = await server.req.get('/literal', {});
+      await server.req.get('/literal', {});
     } catch (err) {
       code.expect(err).to.not.equal(null);
     }
@@ -98,7 +97,7 @@ lab.experiment('local', async() => {
 
   lab.test('post failures are handled', async () => {
     try {
-      const result = await server.req.post('/literal', {});
+      await server.req.post('/literal', {});
     } catch (err) {
       code.expect(err).to.not.equal(null);
     }
@@ -114,7 +113,7 @@ lab.experiment('local', async() => {
     });
     code.expect(server.req.post).to.exist();
     try {
-      const result = await server.req.post('/literal', { payload: { t: true } });
+      await server.req.post('/literal', { payload: { t: true } });
     } catch (err) {
       code.expect(err).to.not.equal(null);
       code.expect(err.output.payload.message).to.equal('returned payload was not valid JSON');
@@ -136,7 +135,7 @@ lab.experiment('local', async() => {
 
   lab.test('put failures are handled', async () => {
     try {
-      const result = await server.req.put('/literal', {});
+      await server.req.put('/literal', {});
     } catch (err) {
       code.expect(err).to.not.equal(null);
     }
@@ -185,11 +184,11 @@ lab.experiment('local', async() => {
   });
 });
 
-lab.experiment('local', async () => {
+lab.experiment('local', () => {
   lab.beforeEach(async () => {
     testServer = new hapi.Server({ port: 8000 });
     server = new hapi.Server({ port: 9000 });
-    const response = await server.register({
+    await server.register({
       plugin: hapiReq,
       options: {
         localPrefix: '/api'
@@ -212,6 +211,61 @@ lab.experiment('local', async () => {
   });
 
   lab.test('localPrefix plugin option', async () => {
-    const result = await server.req.get('/literal', {});
+    await server.req.get('/literal', {});
+  });
+});
+
+lab.experiment('retry', () => {
+  let retryCount = 0;
+
+  lab.beforeEach(async () => {
+    testServer = new hapi.Server({ port: 8000 });
+    server = new hapi.Server({ port: 9000 });
+    await server.register({
+      plugin: hapiReq,
+      options: {
+        maxRetries: 2
+      }
+    });
+    await testServer.start();
+    await server.start();
+  });
+
+  lab.afterEach(async () => {
+    await testServer.stop();
+    await server.stop();
+    retryCount = 0;
+  });
+
+  lab.test('failures are retried', async () => {
+    server.route({
+      path: '/error',
+      method: 'get',
+      handler(request, h) {
+        retryCount++;
+
+        if (retryCount > 1) {
+          return { count: retryCount };
+        }
+
+        throw new Error('test error');
+      }
+    });
+
+    const response = await server.req.get('/error', {});
+    code.expect(response.count).to.equal(2);
+  });
+
+  lab.test('failures are retried', async () => {
+    server.route({
+      path: '/error',
+      method: 'get',
+      handler(request, h) {
+        throw new Error('test error');
+      }
+    });
+
+    const response = await server.req.get('/error', {});
+    code.expect(response.isBoom).to.equal(true);
   });
 });
