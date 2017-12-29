@@ -43,7 +43,7 @@ const register = function(server, pluginOptions) {
         server.log(['hapi-req', 'info'], `Max retries: ${method} ${url}`);
       }
 
-      return e;
+      throw e;
     }
   };
 

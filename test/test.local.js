@@ -265,7 +265,10 @@ lab.experiment('retry', () => {
       }
     });
 
-    const response = await server.req.get('/error', {});
-    code.expect(response.isBoom).to.equal(true);
+    try {
+      await server.req.get('/error', {});
+    } catch (e) {
+      code.expect(e.isBoom).to.equal(true);
+    }
   });
 });

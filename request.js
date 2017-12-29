@@ -30,6 +30,8 @@ module.exports = async (method, url, options) => {
 
     return payload;
   } catch (err) {
-    return Boom.create(err.output.statusCode, err.output.payload.error);
+    return new Boom(err.output.payload.error, {
+      statusCode: err.output.payload.statusCode || 500
+    });
   }
 };

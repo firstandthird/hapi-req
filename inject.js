@@ -17,6 +17,10 @@ module.exports = async(server, method, url, options) => {
   const res = await server.inject(packet);
 
   if (res.statusCode !== 200) {
+    if (Boom.isBoom(res.payload)) {
+      return res.payload;
+    }
+
     return new Boom(res.payload.message || res.statusMessage, {
       statusCode: res.statusCode,
       data: res.payload
