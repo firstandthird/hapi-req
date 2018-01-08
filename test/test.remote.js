@@ -3,10 +3,75 @@ const Lab = require('lab');
 const lab = exports.lab = Lab.script();
 const code = require('code');
 const hapiReq = require('../index.js');
-let testServer;
-let server;
+
+lab.experiment('remote settings', (allDone) => {
+  let testServer;
+  let server;
+
+  lab.beforeEach(async() => {
+    testServer = new hapi.Server({ port: 8000 });
+    server = new hapi.Server({ port: 9000 });
+    await server.register({
+      plugin: hapiReq,
+      options: {
+        timeout: 7000
+      }
+    });
+    await testServer.start();
+    await server.start();
+  });
+  lab.afterEach(async() => {
+    await testServer.stop();
+    await server.stop();
+  });
+
+  lab.test('can set timeout option', { timeout: 10000 }, async() => {
+    testServer.route({
+      path: '/literal',
+      method: 'get',
+      handler: async(request, h) => {
+        const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
+        await wait(6000);
+        return {};
+      }
+    });
+    await server.req.get('http://localhost:8000/literal', {});
+  });
+  lab.test('timeout after 5 seconds by default', { timeout: 10000 }, async () => {
+    testServer.route({
+      path: '/literal',
+      method: 'get',
+      handler: async(request, h) => {
+        const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
+        await wait(7100);
+        return {};
+      }
+    });
+    try {
+      await server.req.get('http://localhost:8000/literal', {});
+    } catch (err) {
+      code.expect(err).to.not.equal(null);
+    }
+  });
+
+  lab.test('support option to get back response object', async() => {
+    testServer.route({
+      path: '/literal',
+      method: 'get',
+      handler: (request, h) => ({ result: true })
+    });
+    const result = await server.req.get('http://localhost:8000/literal', { returnResponse: true });
+    code.expect(result).to.not.equal(null);
+    code.expect(result.result.statusCode).to.equal(200);
+    code.expect(result.result.headers).to.not.equal(null);
+    code.expect(result.payload.result).to.equal(true);
+  });
+});
 
 lab.experiment('remote', (allDone) => {
+  let testServer;
+  let server;
+
   lab.beforeEach(async () => {
     testServer = new hapi.Server({ port: 8000 });
     server = new hapi.Server({ port: 9000 });
@@ -105,26 +170,6 @@ lab.experiment('remote', (allDone) => {
     }
   });
 
-  lab.test('deletes successfully', async () => {
-    testServer.route({
-      path: '/literal',
-      method: 'delete',
-      handler(request, h) {
-        return { f: 'true' };
-      }
-    });
-    code.expect(server.req.delete).to.exist();
-    await server.req.delete('http://localhost:8000/literal', {});
-  });
-
-  lab.test('delete failures are handled', () => {
-    try {
-      server.req.delete('http://localhost:8000/literal', {});
-    } catch (err) {
-      code.expect(err).to.not.equal(null);
-    }
-  });
-
   lab.test('patch successfully', async() => {
     testServer.route({
       path: '/literal',
@@ -145,6 +190,26 @@ lab.experiment('remote', (allDone) => {
     }
   });
 
+  lab.test('deletes successfully', async () => {
+    testServer.route({
+      path: '/literal',
+      method: 'delete',
+      handler(request, h) {
+        return { f: 'true' };
+      }
+    });
+    code.expect(server.req.delete).to.exist();
+    await server.req.delete('http://localhost:8000/literal', {});
+  });
+
+  lab.test('delete failures are handled', async () => {
+    try {
+      await server.req.delete('http://localhost:8000/literal', {});
+    } catch (err) {
+      code.expect(err).to.not.equal(null);
+    }
+  });
+
   lab.test('timeout after 5 seconds by default', { timeout: 10000 }, async () => {
     testServer.route({
       path: '/literal',
@@ -160,66 +225,5 @@ lab.experiment('remote', (allDone) => {
     } catch (err) {
       code.expect(err).to.not.equal(null);
     }
-  });
-});
-
-lab.experiment('remote', (allDone) => {
-  lab.beforeEach(async() => {
-    testServer = new hapi.Server({ port: 8000 });
-    server = new hapi.Server({ port: 9000 });
-    await server.register({
-      plugin: hapiReq,
-      options: {
-        timeout: 7000
-      }
-    });
-    await testServer.start();
-    await server.start();
-  });
-  lab.afterEach(async() => {
-    await testServer.stop();
-    await server.stop();
-  });
-
-  lab.test('can set timeout option', { timeout: 10000 }, async() => {
-    testServer.route({
-      path: '/literal',
-      method: 'get',
-      handler: async(request, h) => {
-        const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
-        await wait(6000);
-        return {};
-      }
-    });
-    await server.req.get('http://localhost:8000/literal', {});
-  });
-  lab.test('timeout after 5 seconds by default', { timeout: 10000 }, () => {
-    testServer.route({
-      path: '/literal',
-      method: 'get',
-      handler: async(request, h) => {
-        const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
-        await wait(7100);
-        return {};
-      }
-    });
-    try {
-      server.req.get('http://localhost:8000/literal', {});
-    } catch (err) {
-      code.expect(err).to.not.equal(null);
-    }
-  });
-
-  lab.test('support option to get back response object', async() => {
-    testServer.route({
-      path: '/literal',
-      method: 'get',
-      handler: (request, h) => ({ result: true })
-    });
-    const result = await server.req.get('http://localhost:8000/literal', { returnResponse: true });
-    code.expect(result).to.not.equal(null);
-    code.expect(result.result.statusCode).to.equal(200);
-    code.expect(result.result.headers).to.not.equal(null);
-    code.expect(result.payload.result).to.equal(true);
   });
 });

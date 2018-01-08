@@ -7,12 +7,12 @@ const defaults = {
   maxRetries: 0
 };
 
-const register = function(server, pluginOptions) {
-  const callIt = async (method, url, options, count = 0) => {
+const register = function(server, pluginOptions = {}) {
+  const callIt = async (method, url, options = {}, count = 0) => {
     try {
       let response;
 
-      Object.assign(options, defaults, pluginOptions);
+      options = Object.assign(options, defaults, pluginOptions);
 
       // construct url from any relevant options:
       if (options.query) {
