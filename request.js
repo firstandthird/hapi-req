@@ -13,6 +13,10 @@ module.exports = (method, url, options, callback) => {
   packet.timeout = options.timeout || 5000;
   return wreck[method](url, packet, (err, res, payload) => {
     if (err) {
+      if (!err.output) {
+        return callback(Boom.wrap(err, 500));
+      }
+
       return callback(Boom.create(err.output.statusCode, err.output.payload.error, payload));
     }
     if (options.returnResponse) {
