@@ -3,7 +3,7 @@ const local = require('./inject.js');
 const remote = require('./request.js');
 const querystring = require('querystring');
 
-const register = async function(server, pluginOptions) {
+const register = function(server, pluginOptions) {
   const callIt = async (method, url, options) => {
     if (!options) {
       options = {};
@@ -17,26 +17,16 @@ const register = async function(server, pluginOptions) {
       if (pluginOptions.localPrefix) {
         url = `${pluginOptions.localPrefix}${url}`;
       }
-      return await local(server, method, url, options);
+      return local(server, method, url, options);
     }
-    return await remote(method, url, options);
+    return remote(method, url, options);
   };
   const req = {
-    get: async (url, options) => {
-      return await callIt('get', url, options);
-    },
-    post: async (url, options) => {
-      return await callIt('post', url, options);
-    },
-    put: async (url, options) => {
-      return await callIt('put', url, options);
-    },
-    delete: async (url, options) => {
-      return await callIt('delete', url, options);
-    },
-    patch: async (url, options) => {
-      return await callIt('patch', url, options);
-    }
+    get: (url, options) => callIt('get', url, options),
+    post: (url, options) => callIt('post', url, options),
+    put: (url, options) => callIt('put', url, options),
+    delete: (url, options) => callIt('delete', url, options),
+    patch: (url, options) => callIt('patch', url, options)
   };
   server.decorate('server', 'req', req);
 };
