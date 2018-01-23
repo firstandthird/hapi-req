@@ -5,6 +5,9 @@ const querystring = require('querystring');
 
 const register = async function(server, pluginOptions) {
   const callIt = async (method, url, options) => {
+    if (!options) {
+      options = {};
+    }
     Object.assign(options, pluginOptions);
     // construct url from any relevant options:
     if (options.query) {
