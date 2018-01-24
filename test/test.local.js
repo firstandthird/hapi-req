@@ -183,6 +183,19 @@ lab.experiment('local', async() => {
       code.expect(err).to.not.equal(null);
     }
   });
+
+  lab.test('options parameter is optional', async() => {
+    server.route({
+      path: '/literal',
+      method: 'get',
+      handler(request, h) {
+        return { f: 'true' };
+      }
+    });
+    code.expect(server.req.get).to.exist();
+    const result = await server.req.get('/literal');
+    code.expect(result.f).to.equal('true');
+  });
 });
 
 lab.experiment('local', async () => {
