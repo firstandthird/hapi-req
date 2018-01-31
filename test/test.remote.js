@@ -205,7 +205,7 @@ lab.experiment('remote', (allDone) => {
       }
     });
     try {
-      server.req.get('http://localhost:8000/literal', {});
+      await server.req.get('http://localhost:8000/literal', {});
     } catch (err) {
       code.expect(err).to.not.equal(null);
     }
