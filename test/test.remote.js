@@ -39,16 +39,16 @@ lab.experiment('remote', (allDone) => {
       await server.req.get('http://localhost:8000/literal', {});
     } catch (err) {
       code.expect(err).to.not.equal(null);
-      code.expect(err.message).to.equal('Not Found');
+      code.expect(err.message).to.equal('Response Error: 404 Not Found');
     }
   });
 
   lab.test('get failures are handled', async () => {
     try {
       const result = await server.req.get('http://localhost:8001/literal', {});
-    } catch (e) {
+    } catch (err) {
       code.expect(err).to.not.equal(null);
-      code.expect(err.message).to.equal('Bad Gateway');
+      code.expect(err.toString()).to.equal('Error: Client request error: connect ECONNREFUSED 127.0.0.1:8001');
     }
   });
 
@@ -120,7 +120,7 @@ lab.experiment('remote', (allDone) => {
 
   lab.test('delete failures are handled', async() => {
     try {
-      server.req.delete('http://localhost:8000/literal', {});
+      await server.req.delete('http://localhost:8000/literal', {});
     } catch (err) {
       code.expect(err).to.not.equal(null);
     }
@@ -205,7 +205,7 @@ lab.experiment('remote', (allDone) => {
       }
     });
     try {
-      server.req.get('http://localhost:8000/literal', {});
+      await server.req.get('http://localhost:8000/literal', {});
     } catch (err) {
       code.expect(err).to.not.equal(null);
     }
