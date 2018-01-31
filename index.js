@@ -1,6 +1,6 @@
 'use strict';
-const local = require('./inject.js');
-const remote = require('./request.js');
+const local = require('./local.js');
+const remote = require('./remote.js');
 const querystring = require('querystring');
 
 const register = function(server, pluginOptions) {
