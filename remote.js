@@ -15,8 +15,5 @@ module.exports = async (method, url, options) => {
   if (options.returnResponse) {
     return { result: res, payload };
   }
-  if (res.statusCode >= 400) {
-    throw Boom.create(res.statusCode, (payload ? payload.message : false) || res.statusMessage, payload);
-  }
   return payload;
 };
