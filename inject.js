@@ -14,7 +14,7 @@ module.exports = async(server, method, url, options) => {
 
   const res = await server.inject(packet);
   if (res.statusCode !== 200) {
-    return Boom.create(res.statusCode, res.payload.message || res.statusMessage, res.payload);
+    throw Boom.create(res.statusCode, res.payload.message || res.statusMessage, res.payload);
   }
   let out = null;
   try {
@@ -24,6 +24,6 @@ module.exports = async(server, method, url, options) => {
     }
     return out;
   } catch (e) {
-    return Boom.badRequest('returned payload was not valid JSON', res.payload);
+    throw Boom.badRequest('returned payload was not valid JSON', res.payload);
   }
 };

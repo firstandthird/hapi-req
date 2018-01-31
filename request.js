@@ -17,10 +17,10 @@ module.exports = async (method, url, options) => {
       return { result: res, payload };
     }
     if (res.statusCode !== 200) {
-      return Boom.create(res.statusCode, (payload ? payload.message : false) || res.statusMessage, payload);
+      throw Boom.create(res.statusCode, (payload ? payload.message : false) || res.statusMessage, payload);
     }
     return payload;
   } catch (err) {
-    return Boom.create(err.output.statusCode, err.output.payload.error);
+    throw Boom.create(err.output.statusCode, err.output.payload.error);
   }
 };

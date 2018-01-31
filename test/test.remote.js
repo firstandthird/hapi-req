@@ -46,7 +46,7 @@ lab.experiment('remote', (allDone) => {
   lab.test('get failures are handled', async () => {
     try {
       const result = await server.req.get('http://localhost:8001/literal', {});
-    } catch (e) {
+    } catch (err) {
       code.expect(err).to.not.equal(null);
       code.expect(err.message).to.equal('Bad Gateway');
     }
@@ -120,7 +120,7 @@ lab.experiment('remote', (allDone) => {
 
   lab.test('delete failures are handled', async() => {
     try {
-      server.req.delete('http://localhost:8000/literal', {});
+      await server.req.delete('http://localhost:8000/literal', {});
     } catch (err) {
       code.expect(err).to.not.equal(null);
     }
