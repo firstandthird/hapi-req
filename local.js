@@ -15,16 +15,8 @@ module.exports = async(server, method, url, options) => {
   }
 
   const res = await server.inject(packet);
-
-  if (res.statusCode !== 200) {
-    if (Boom.isBoom(res.payload)) {
-      return res.payload;
-    }
-
-    return new Boom(res.payload.message || res.statusMessage, {
-      statusCode: res.statusCode,
-      data: res.payload
-    });
+  if (res.statusCode >= 400) {
+    throw Boom.create(res.statusCode, res.payload.message || res.statusMessage, res.payload);
   }
 
   let out = null;
@@ -38,6 +30,6 @@ module.exports = async(server, method, url, options) => {
 
     return out;
   } catch (e) {
-    return Boom.badRequest('returned payload was not valid JSON', res.payload);
+    throw Boom.badRequest('returned payload was not valid JSON', res.payload);
   }
 };

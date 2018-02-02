@@ -182,6 +182,19 @@ lab.experiment('local', () => {
       code.expect(err).to.not.equal(null);
     }
   });
+
+  lab.test('options parameter is optional', async() => {
+    server.route({
+      path: '/literal',
+      method: 'get',
+      handler(request, h) {
+        return { f: 'true' };
+      }
+    });
+    code.expect(server.req.get).to.exist();
+    const result = await server.req.get('/literal');
+    code.expect(result.f).to.equal('true');
+  });
 });
 
 lab.experiment('local', () => {
@@ -254,21 +267,5 @@ lab.experiment('retry', () => {
 
     const response = await server.req.get('/error', {});
     code.expect(response.count).to.equal(2);
-  });
-
-  lab.test('failures are retried', async () => {
-    server.route({
-      path: '/error',
-      method: 'get',
-      handler(request, h) {
-        throw new Error('test error');
-      }
-    });
-
-    try {
-      await server.req.get('/error', {});
-    } catch (e) {
-      code.expect(e.isBoom).to.equal(true);
-    }
   });
 });
