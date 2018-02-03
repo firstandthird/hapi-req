@@ -10,8 +10,9 @@ const register = function(server, pluginOptions) {
     }
     Object.assign(options, pluginOptions);
     // construct url from any relevant options:
-    if (options.query) {
-      url += `?${querystring.stringify(options.query)}`;
+    const optionsQueryString = querystring.stringify(options.query);
+    if (optionsQueryString) {
+      url = `${url}${url.includes('?') ? '&' : '?'}${optionsQueryString}`;
     }
     if (url[0] === '/') {
       if (pluginOptions.localPrefix) {

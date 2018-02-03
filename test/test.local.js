@@ -57,17 +57,24 @@ lab.experiment('local', async() => {
     code.expect(result.payload.f).to.equal('true');
   });
 
-  lab.test('constructs url from  query args correctly', async () => {
+  lab.test('constructs url from query args correctly', async () => {
     server.route({
       path: '/literal',
       method: 'get',
       handler(request, h) {
-        return { result: request.query.value };
+        return { result: request.query };
       }
     });
     code.expect(server.req.get).to.exist();
+    // options.query but no url query:
     const result = await server.req.get('/literal', { query: { value: 'abc' } });
-    code.expect(result.result).to.equal('abc');
+    code.expect(result.result).to.equal({ value: 'abc' });
+    // options.query with url query:
+    const result2 = await server.req.get('/literal?key=xyzzy', { query: { value: 'abc' } });
+    code.expect(result2.result).to.equal({ value: 'abc', key: 'xyzzy' });
+    // url query with no options.query:
+    const result3 = await server.req.get('/literal?key=xyzzy');
+    code.expect(result3.result).to.equal({ key: 'xyzzy' });
   });
 
   lab.test('constructs headers from header args correctly', async () => {
