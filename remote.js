@@ -1,6 +1,5 @@
 'use strict';
 const wreck = require('wreck');
-const Boom = require('boom');
 
 module.exports = async (method, url, options) => {
   const packet = { json: 'force' };

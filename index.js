@@ -1,7 +1,6 @@
 const local = require('./local.js');
 const remote = require('./remote.js');
 const querystring = require('querystring');
-const Boom = require('boom');
 
 const defaults = {
   maxRetries: 0
@@ -14,7 +13,7 @@ const register = function(server, pluginOptions = {}) {
       if (!options) {
         options = {};
       }
-      Object.assign(options, pluginOptions);
+      Object.assign(options, defaults, pluginOptions);
       // construct url from any relevant options:
       const optionsQueryString = querystring.stringify(options.query);
       if (optionsQueryString) {
