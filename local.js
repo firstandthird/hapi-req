@@ -16,7 +16,7 @@ module.exports = async(server, method, url, options) => {
 
   const res = await server.inject(packet);
   if (res.statusCode >= 400) {
-    throw Boom.create(res.statusCode, res.payload.message || res.statusMessage, res.payload);
+    throw Boom.boomify(res);
   }
 
   let out = null;

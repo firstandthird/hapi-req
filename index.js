@@ -11,27 +11,23 @@ const register = function(server, pluginOptions = {}) {
   const callIt = async (method, url, options = {}, count = 0) => {
     try {
       let response;
-
-      options = Object.assign(options, defaults, pluginOptions);
-
+      if (!options) {
+        options = {};
+      }
+      Object.assign(options, pluginOptions);
       // construct url from any relevant options:
-      if (options.query) {
-        url += `?${querystring.stringify(options.query)}`;
+      const optionsQueryString = querystring.stringify(options.query);
+      if (optionsQueryString) {
+        url = `${url}${url.includes('?') ? '&' : '?'}${optionsQueryString}`;
       }
       if (url[0] === '/') {
         if (pluginOptions.localPrefix) {
           url = `${pluginOptions.localPrefix}${url}`;
         }
-
         response = await local(server, method, url, options);
       } else {
         response = await remote(method, url, options);
       }
-
-      if (Boom.isBoom(response) || response instanceof Error) {
-        throw Boom.boomify(response);
-      }
-
       return response;
     } catch (e) {
       if (count < options.maxRetries) {
