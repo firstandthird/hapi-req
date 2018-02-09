@@ -1,27 +1,47 @@
-'use strict';
 const local = require('./local.js');
 const remote = require('./remote.js');
 const querystring = require('querystring');
 
-const register = function(server, pluginOptions) {
-  const callIt = async (method, url, options) => {
-    if (!options) {
-      options = {};
-    }
-    Object.assign(options, pluginOptions);
-    // construct url from any relevant options:
-    const optionsQueryString = querystring.stringify(options.query);
-    if (optionsQueryString) {
-      url = `${url}${url.includes('?') ? '&' : '?'}${optionsQueryString}`;
-    }
-    if (url[0] === '/') {
-      if (pluginOptions.localPrefix) {
-        url = `${pluginOptions.localPrefix}${url}`;
+const defaults = {
+  maxRetries: 0
+};
+
+const register = function(server, pluginOptions = {}) {
+  const callIt = async (method, url, options = {}, count = 0) => {
+    try {
+      let response;
+      if (!options) {
+        options = {};
       }
-      return local(server, method, url, options);
+      Object.assign(options, defaults, pluginOptions);
+      // construct url from any relevant options:
+      const optionsQueryString = querystring.stringify(options.query);
+      if (optionsQueryString) {
+        url = `${url}${url.includes('?') ? '&' : '?'}${optionsQueryString}`;
+      }
+      if (url[0] === '/') {
+        if (pluginOptions.localPrefix) {
+          url = `${pluginOptions.localPrefix}${url}`;
+        }
+        response = await local(server, method, url, options);
+      } else {
+        response = await remote(method, url, options);
+      }
+      return response;
+    } catch (e) {
+      if (count < options.maxRetries) {
+        server.log(['hapi-req', 'info'], `Retry #${count + 1}: ${method} ${url}`);
+        return callIt(method, url, options, count + 1);
+      }
+
+      if (options.maxRetries) {
+        server.log(['hapi-req', 'info'], `Max retries: ${method} ${url}`);
+      }
+
+      throw e;
     }
-    return remote(method, url, options);
   };
+
   const req = {
     get: (url, options) => callIt('get', url, options),
     post: (url, options) => callIt('post', url, options),
@@ -29,6 +49,7 @@ const register = function(server, pluginOptions) {
     delete: (url, options) => callIt('delete', url, options),
     patch: (url, options) => callIt('patch', url, options)
   };
+
   server.decorate('server', 'req', req);
 };
 
