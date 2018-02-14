@@ -2,7 +2,7 @@
 const wreck = require('wreck');
 
 module.exports = async (method, url, options) => {
-  const packet = { json: 'force' };
+  const packet = { json: options.json };
   if (options.headers) {
     packet.headers = options.headers;
   }

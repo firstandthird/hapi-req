@@ -3,17 +3,15 @@ const remote = require('./remote.js');
 const querystring = require('querystring');
 
 const defaults = {
-  maxRetries: 0
+  maxRetries: 0,
+  json: 'force'
 };
 
 const register = function(server, pluginOptions = {}) {
-  const callIt = async (method, url, options = {}, count = 0) => {
+  const callIt = async (method, url, methodOptions = {}, count = 0) => {
+    const options = Object.assign({}, defaults, methodOptions, pluginOptions);
     try {
       let response;
-      if (!options) {
-        options = {};
-      }
-      Object.assign(options, defaults, pluginOptions);
       // construct url from any relevant options:
       const optionsQueryString = querystring.stringify(options.query);
       if (optionsQueryString) {
