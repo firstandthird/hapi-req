@@ -14,7 +14,11 @@ module.exports = async (server, method, url, options) => {
   const { res, payload } = await wreck[method](url, packet);
   const endDate = new Date();
   if (options.verbose) {
-    server.log(['hapi-req', 'info'], `Request ${url} status was HTTP ${res.statusCode} took ${endDate.getTime() - startDate.getTime()}ms`);
+    server.log(['hapi-req', 'info'], {
+      url,
+      statusCode: res.statusCode,
+      timeElapsed: endDate.getTime() - startDate.getTime()
+    });
   }
 
   if (options.returnResponse) {

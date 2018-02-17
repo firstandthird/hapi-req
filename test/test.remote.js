@@ -44,12 +44,15 @@ lab.experiment('verbose mode', (allDone) => {
     });
     const logs = [];
     server.events.on('log', event => {
-      logs.push(event);
+      logs.push(event.data);
     });
     await server.req.get('http://localhost:8000/literal', {});
     const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
     await wait(2000);
-    code.expect(logs[0].data).to.include('Request http://localhost:8000/literal status was HTTP 200 took');
+    const data = logs[0];
+    code.expect(Object.keys(data)).to.equal(['url', 'statusCode', 'timeElapsed']);
+    code.expect(typeof data.timeElapsed).to.equal('number');
+    code.expect(data.timeElapsed).to.be.greaterThan(99);
   });
 });
 

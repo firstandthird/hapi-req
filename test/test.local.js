@@ -6,7 +6,7 @@ const hapiReq = require('../index.js');
 let testServer;
 let server;
 
-lab.experiment('local', () => {
+lab.experiment('verbose mode', () => {
   lab.beforeEach(async () => {
     testServer = new hapi.Server({ port: 8000 });
     server = new hapi.Server({
@@ -30,7 +30,7 @@ lab.experiment('local', () => {
     await server.stop();
   });
 
-  lab.test('gets successfully', async() => {
+  lab.test('verbose mode prints out timing and status code info', async() => {
     server.route({
       path: '/literal',
       method: 'get',
@@ -42,12 +42,15 @@ lab.experiment('local', () => {
     });
     const logs = [];
     server.events.on('log', event => {
-      logs.push(event);
+      logs.push(event.data);
     });
     await server.req.get('/literal', {});
     const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
     await wait(1000);
-    code.expect(logs[0].data).to.include('Request /literal status was HTTP 200 took');
+    const data = logs[0];
+    code.expect(Object.keys(data)).to.equal(['url', 'statusCode', 'timeElapsed']);
+    code.expect(typeof data.timeElapsed).to.equal('number');
+    code.expect(data.timeElapsed).to.be.greaterThan(99);
   });
 });
 
