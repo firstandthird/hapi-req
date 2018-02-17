@@ -4,6 +4,58 @@ const lab = exports.lab = Lab.script();
 const code = require('code');
 const hapiReq = require('../index.js');
 
+lab.experiment('verbose mode', (allDone) => {
+  let testServer;
+  let server;
+
+  lab.beforeEach(async() => {
+    testServer = new hapi.Server({
+      port: 8000,
+    });
+    server = new hapi.Server({
+      port: 9000,
+      debug: {
+        log: ['*', 'hapi-req']
+      }
+    });
+    await server.register({
+      plugin: hapiReq,
+      options: {
+        verbose: true
+      }
+    });
+    await testServer.start();
+    await server.start();
+  });
+  lab.afterEach(async() => {
+    await testServer.stop();
+    await server.stop();
+  });
+
+  lab.test('verbose mode prints out timing and status code info', { timeout: 10000 }, async() => {
+    testServer.route({
+      path: '/literal',
+      method: 'get',
+      handler: async(request, h) => {
+        const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
+        await wait(100);
+        return {};
+      }
+    });
+    const logs = [];
+    server.events.on('log', event => {
+      logs.push(event.data);
+    });
+    await server.req.get('http://localhost:8000/literal', {});
+    const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
+    await wait(2000);
+    const data = logs[0];
+    code.expect(Object.keys(data)).to.equal(['url', 'statusCode', 'timeElapsed']);
+    code.expect(typeof data.timeElapsed).to.equal('number');
+    code.expect(data.timeElapsed).to.be.greaterThan(99);
+  });
+});
+
 lab.experiment('remote settings', (allDone) => {
   let testServer;
   let server;
@@ -24,6 +76,7 @@ lab.experiment('remote settings', (allDone) => {
     await testServer.stop();
     await server.stop();
   });
+
   lab.test('can set timeout option', { timeout: 10000 }, async() => {
     testServer.route({
       path: '/literal',
@@ -36,6 +89,7 @@ lab.experiment('remote settings', (allDone) => {
     });
     await server.req.get('http://localhost:8000/literal', {});
   });
+
   lab.test('timeout after 5 seconds by default', { timeout: 10000 }, async () => {
     testServer.route({
       path: '/literal',

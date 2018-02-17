@@ -6,6 +6,54 @@ const hapiReq = require('../index.js');
 let testServer;
 let server;
 
+lab.experiment('verbose mode', () => {
+  lab.beforeEach(async () => {
+    testServer = new hapi.Server({ port: 8000 });
+    server = new hapi.Server({
+      port: 9000,
+      debug: {
+        log: ['*']
+      }
+    });
+    await server.register({
+      plugin: hapiReq,
+      options: {
+        verbose: true
+      }
+    });
+    await testServer.start();
+    await server.start();
+  });
+
+  lab.afterEach(async () => {
+    await testServer.stop();
+    await server.stop();
+  });
+
+  lab.test('verbose mode prints out timing and status code info', async() => {
+    server.route({
+      path: '/literal',
+      method: 'get',
+      async handler(request, h) {
+        const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
+        await wait(100);
+        return { f: 'true' };
+      }
+    });
+    const logs = [];
+    server.events.on('log', event => {
+      logs.push(event.data);
+    });
+    await server.req.get('/literal', {});
+    const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
+    await wait(1000);
+    const data = logs[0];
+    code.expect(Object.keys(data)).to.equal(['url', 'statusCode', 'timeElapsed']);
+    code.expect(typeof data.timeElapsed).to.equal('number');
+    code.expect(data.timeElapsed).to.be.greaterThan(99);
+  });
+});
+
 lab.experiment('local', () => {
   lab.beforeEach(async () => {
     testServer = new hapi.Server({ port: 8000 });
