@@ -9,6 +9,51 @@ let server;
 lab.experiment('local', () => {
   lab.beforeEach(async () => {
     testServer = new hapi.Server({ port: 8000 });
+    server = new hapi.Server({
+      port: 9000,
+      debug: {
+        log: ['*']
+      }
+    });
+    await server.register({
+      plugin: hapiReq,
+      options: {
+        verbose: true
+      }
+    });
+    await testServer.start();
+    await server.start();
+  });
+
+  lab.afterEach(async () => {
+    await testServer.stop();
+    await server.stop();
+  });
+
+  lab.test('gets successfully', async() => {
+    server.route({
+      path: '/literal',
+      method: 'get',
+      async handler(request, h) {
+        const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
+        await wait(100);
+        return { f: 'true' };
+      }
+    });
+    const logs = [];
+    server.events.on('log', event => {
+      logs.push(event);
+    });
+    await server.req.get('/literal', {});
+    const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
+    await wait(1000);
+    code.expect(logs[0].data).to.include('Request /literal status was HTTP 200 took');
+  });
+});
+
+lab.experiment('local', () => {
+  lab.beforeEach(async () => {
+    testServer = new hapi.Server({ port: 8000 });
     server = new hapi.Server({ port: 9000 });
     await server.register(hapiReq);
     await testServer.start();

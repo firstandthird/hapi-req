@@ -23,7 +23,7 @@ const register = function(server, pluginOptions = {}) {
         }
         response = await local(server, method, url, options);
       } else {
-        response = await remote(method, url, options);
+        response = await remote(server, method, url, options);
       }
       return response;
     } catch (e) {
@@ -35,7 +35,6 @@ const register = function(server, pluginOptions = {}) {
       if (options.maxRetries) {
         server.log(['hapi-req', 'info'], `Max retries: ${method} ${url}`);
       }
-
       throw e;
     }
   };

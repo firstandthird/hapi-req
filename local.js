@@ -13,8 +13,13 @@ module.exports = async(server, method, url, options) => {
   if (options.headers) {
     packet.headers = options.headers;
   }
-
+  const startDate = new Date();
   const res = await server.inject(packet);
+  const endDate = new Date();
+  if (options.verbose) {
+    server.log(['hapi-req', 'info'], `Request ${url} status was HTTP ${res.statusCode} took ${endDate.getTime() - startDate.getTime()}ms`);
+  }
+
   if (res.statusCode >= 400) {
     throw Boom.boomify(res);
   }
