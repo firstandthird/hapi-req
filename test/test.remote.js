@@ -24,7 +24,6 @@ lab.experiment('remote settings', (allDone) => {
     await testServer.stop();
     await server.stop();
   });
-
   lab.test('can set timeout option', { timeout: 10000 }, async() => {
     testServer.route({
       path: '/literal',
@@ -65,6 +64,17 @@ lab.experiment('remote settings', (allDone) => {
     code.expect(result.result.statusCode).to.equal(200);
     code.expect(result.result.headers).to.not.equal(null);
     code.expect(result.payload.result).to.equal(true);
+  });
+
+  lab.test('support option to turn off json response', async() => {
+    testServer.route({
+      path: '/literal',
+      method: 'get',
+      handler: (request, h) => 'not json'
+    });
+    // when json option is true, wreck will return the string if it cannot parse it as JSON:
+    const result1 = await server.req.get('http://localhost:8000/literal', { json: true });
+    code.expect(result1.toString()).to.equal('not json');
   });
 });
 
