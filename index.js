@@ -46,8 +46,29 @@ const register = function(server, pluginOptions = {}) {
     delete: (url, options) => callIt('delete', url, options),
     patch: (url, options) => callIt('patch', url, options)
   };
-
   server.decorate('server', 'req', req);
+
+  // decorate the request directly to access the request object:
+  server.decorate('request', 'get', function (url, options = {}) {
+    options.request = this;
+    return callIt('get', url, options);
+  });
+  server.decorate('request', 'post', function (url, options = {}) {
+    options.request = this;
+    return callIt('post', url, options);
+  });
+  server.decorate('request', 'put', function (url, options = {}) {
+    options.request = this;
+    return callIt('put', url, options);
+  });
+  server.decorate('request', 'delete', function (url, options = {}) {
+    options.request = this;
+    return callIt('delete', url, options);
+  });
+  server.decorate('request', 'patch', function (url, options = {}) {
+    options.request = this;
+    return callIt('patch', url, options);
+  });
 };
 
 exports.plugin = {

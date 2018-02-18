@@ -291,3 +291,100 @@ lab.experiment('remote', (allDone) => {
     }
   });
 });
+
+lab.experiment('request', (allDone) => {
+  let testServer;
+  let server;
+
+  lab.beforeEach(async () => {
+    testServer = new hapi.Server({ port: 8000 });
+    server = new hapi.Server({ port: 9000 });
+    await server.register({
+      plugin: hapiReq,
+      options: {
+        verbose: true
+      }
+    });
+    await testServer.start();
+    await server.start();
+  });
+
+  lab.afterEach(async () => {
+    await testServer.stop();
+    await server.stop();
+  });
+
+  lab.test('can be called from the request', async () => {
+    server.route({
+      path: '/request',
+      method: 'get',
+      handler(request, h) {
+        code.expect(request.get).to.exist();
+        return request.get('http://localhost:8000/literal', {});
+      }
+    });
+    testServer.route({
+      path: '/literal',
+      method: 'get',
+      handler(request, h) {
+        return { f: 'true' };
+      }
+    });
+    const response = await server.req.get('/request');
+    code.expect(response).to.equal({ f: 'true' });
+  });
+
+  lab.test('verbose mode includes request url when called from request', async () => {
+    server.route({
+      path: '/request',
+      method: 'get',
+      handler(request, h) {
+        return request.get('http://localhost:8000/literal');
+      }
+    });
+    testServer.route({
+      path: '/literal',
+      method: 'get',
+      handler(request, h) {
+        return { f: 'true' };
+      }
+    });
+    const statements = [];
+    server.events.on('log', (event, tags) => {
+      statements.push(event.data);
+    });
+    await server.req.get('/request');
+    const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
+    await wait(300);
+    code.expect(typeof statements[0].timeElapsed).to.equal('number');
+    delete statements[0].timeElapsed;
+    code.expect(statements[0]).to.equal({
+      url: 'http://localhost:8000/literal',
+      statusCode: 200,
+      requestUrl: '/request'
+    });
+  });
+
+  lab.test('will add response time to hapi-timing if it is in use', async () => {
+    server.route({
+      path: '/request',
+      method: 'get',
+      async handler(request, h) {
+        request.timingStart = () => {};
+        request.plugins['hapi-timing'] = {};
+        const result = await request.get('http://localhost:8000/literal', {});
+        code.expect(typeof request.plugins['hapi-timing']['hapi-req']).to.equal('number');
+        return result;
+      }
+    });
+    testServer.route({
+      path: '/literal',
+      method: 'get',
+      handler(request, h) {
+        return { f: 'true' };
+      }
+    });
+    const response = await server.req.get('/request');
+    code.expect(response).to.equal({ f: 'true' });
+  });
+});
