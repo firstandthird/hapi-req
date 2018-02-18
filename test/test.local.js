@@ -6,6 +6,55 @@ const hapiReq = require('../index.js');
 let testServer;
 let server;
 
+lab.experiment('slow warning', () => {
+  lab.beforeEach(async () => {
+    testServer = new hapi.Server({ port: 8000 });
+    server = new hapi.Server({
+      port: 9000,
+      debug: {
+        log: ['*']
+      }
+    });
+    await server.register({
+      plugin: hapiReq,
+      options: {
+        slowWarningLocal: 25
+      }
+    });
+    await testServer.start();
+    await server.start();
+  });
+
+  lab.afterEach(async () => {
+    await testServer.stop();
+    await server.stop();
+  });
+
+  lab.test('always prints out warning when slowWarningLocal is exceeded', async() => {
+    server.route({
+      path: '/literal',
+      method: 'get',
+      async handler(request, h) {
+        const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
+        await wait(100);
+        return { f: 'true' };
+      }
+    });
+    const logs = [];
+    server.events.on('log', (event, tags) => {
+      code.expect(tags.warning).to.equal(true); // make sure 'warning' tag is present
+      logs.push(event.data);
+    });
+    await server.req.get('/literal', {});
+    const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
+    await wait(1000);
+    const data = logs[0];
+    code.expect(Object.keys(data)).to.equal(['url', 'statusCode', 'timeElapsed']);
+    code.expect(typeof data.timeElapsed).to.equal('number');
+    code.expect(data.timeElapsed).to.be.greaterThan(99);
+  });
+});
+
 lab.experiment('verbose mode', () => {
   lab.beforeEach(async () => {
     testServer = new hapi.Server({ port: 8000 });
