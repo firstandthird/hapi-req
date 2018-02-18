@@ -16,15 +16,21 @@ module.exports = async(server, method, url, options) => {
   const startDate = new Date();
   const res = await server.inject(packet);
   const endDate = new Date();
-  const timeElapsed = endDate.getTime() - startDate.getTime();
+  const duration = endDate.getTime() - startDate.getTime();
   if (options.request && options.request.timingStart) {
-    options.request.plugins['hapi-timing']['hapi-req'] = timeElapsed;
+    options.request.plugins['hapi-timing']['hapi-req'] = duration;
   }
-  if (options.verbose) {
+  if (duration > options.slowWarningLocal) {
+    server.log(['hapi-req', 'local', 'warning'], {
+      url,
+      statusCode: res.statusCode,
+      duration
+    });
+  } else if (options.verbose) {
     const data = {
       url,
       statusCode: res.statusCode,
-      timeElapsed
+      duration
     };
     if (options.request) {
       data.requestUrl = options.request.url.href;
