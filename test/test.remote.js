@@ -32,7 +32,7 @@ lab.experiment('slow warning', (allDone) => {
     await server.stop();
   });
 
-  lab.test('always prints out warning when slowWarningLocal is exceeded', { timeout: 10000 }, async() => {
+  lab.test('always prints out warning when slowWarningRemote is exceeded', { timeout: 10000 }, async() => {
     testServer.route({
       path: '/literal',
       method: 'get',
