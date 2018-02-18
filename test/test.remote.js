@@ -51,9 +51,9 @@ lab.experiment('slow warning', (allDone) => {
     const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
     await wait(2000);
     const data = logs[0];
-    code.expect(Object.keys(data)).to.equal(['url', 'statusCode', 'timeElapsed']);
-    code.expect(typeof data.timeElapsed).to.equal('number');
-    code.expect(data.timeElapsed).to.be.greaterThan(99);
+    code.expect(Object.keys(data)).to.equal(['url', 'statusCode', 'duration']);
+    code.expect(typeof data.duration).to.equal('number');
+    code.expect(data.duration).to.be.greaterThan(99);
   });
 });
 
@@ -103,9 +103,9 @@ lab.experiment('verbose mode', (allDone) => {
     const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
     await wait(2000);
     const data = logs[0];
-    code.expect(Object.keys(data)).to.equal(['url', 'statusCode', 'timeElapsed']);
-    code.expect(typeof data.timeElapsed).to.equal('number');
-    code.expect(data.timeElapsed).to.be.greaterThan(99);
+    code.expect(Object.keys(data)).to.equal(['url', 'statusCode', 'duration']);
+    code.expect(typeof data.duration).to.equal('number');
+    code.expect(data.duration).to.be.greaterThan(99);
   });
 });
 

@@ -13,18 +13,18 @@ module.exports = async (server, method, url, options) => {
   const startDate = new Date();
   const { res, payload } = await wreck[method](url, packet);
   const endDate = new Date();
-  const timeElapsed = endDate.getTime() - startDate.getTime();
-  if (timeElapsed > options.slowWarningRemote) {
+  const duration = endDate.getTime() - startDate.getTime();
+  if (duration > options.slowWarningRemote) {
     server.log(['hapi-req', 'remote', 'warning'], {
       url,
       statusCode: res.statusCode,
-      timeElapsed
+      duration
     });
   } else if (options.verbose) {
     server.log(['hapi-req', 'info'], {
       url,
       statusCode: res.statusCode,
-      timeElapsed
+      duration
     });
   }
 
