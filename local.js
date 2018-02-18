@@ -16,11 +16,18 @@ module.exports = async(server, method, url, options) => {
   const startDate = new Date();
   const res = await server.inject(packet);
   const endDate = new Date();
-  if (options.verbose) {
+  const duration = endDate.getTime() - startDate.getTime();
+  if (duration > options.slowWarningLocal) {
+    server.log(['hapi-req', 'local', 'warning'], {
+      url,
+      statusCode: res.statusCode,
+      duration
+    });
+  } else if (options.verbose) {
     server.log(['hapi-req', 'info'], {
       url,
       statusCode: res.statusCode,
-      timeElapsed: endDate.getTime() - startDate.getTime()
+      duration
     });
   }
 

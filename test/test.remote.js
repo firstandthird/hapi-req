@@ -4,6 +4,59 @@ const lab = exports.lab = Lab.script();
 const code = require('code');
 const hapiReq = require('../index.js');
 
+lab.experiment('slow warning', (allDone) => {
+  let testServer;
+  let server;
+
+  lab.beforeEach(async() => {
+    testServer = new hapi.Server({
+      port: 8000,
+    });
+    server = new hapi.Server({
+      port: 9000,
+      debug: {
+        log: ['*', 'hapi-req']
+      }
+    });
+    await server.register({
+      plugin: hapiReq,
+      options: {
+        slowWarningRemote: 25
+      }
+    });
+    await testServer.start();
+    await server.start();
+  });
+  lab.afterEach(async() => {
+    await testServer.stop();
+    await server.stop();
+  });
+
+  lab.test('always prints out warning when slowWarningRemote is exceeded', { timeout: 10000 }, async() => {
+    testServer.route({
+      path: '/literal',
+      method: 'get',
+      handler: async(request, h) => {
+        const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
+        await wait(100);
+        return {};
+      }
+    });
+    const logs = [];
+    server.events.on('log', (event, tags) => {
+      code.expect(tags.warning).to.equal(true); // make sure 'warning' tag is present
+      logs.push(event.data);
+    });
+    await server.req.get('http://localhost:8000/literal', {});
+    const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
+    await wait(2000);
+    const data = logs[0];
+    code.expect(Object.keys(data)).to.equal(['url', 'statusCode', 'duration']);
+    code.expect(typeof data.duration).to.equal('number');
+    code.expect(data.duration).to.be.greaterThan(99);
+  });
+});
+
 lab.experiment('verbose mode', (allDone) => {
   let testServer;
   let server;
@@ -50,9 +103,9 @@ lab.experiment('verbose mode', (allDone) => {
     const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
     await wait(2000);
     const data = logs[0];
-    code.expect(Object.keys(data)).to.equal(['url', 'statusCode', 'timeElapsed']);
-    code.expect(typeof data.timeElapsed).to.equal('number');
-    code.expect(data.timeElapsed).to.be.greaterThan(99);
+    code.expect(Object.keys(data)).to.equal(['url', 'statusCode', 'duration']);
+    code.expect(typeof data.duration).to.equal('number');
+    code.expect(data.duration).to.be.greaterThan(99);
   });
 });
 
