@@ -372,8 +372,7 @@ lab.experiment('request', (allDone) => {
       path: '/request',
       method: 'get',
       handler(request, h) {
-        code.expect(request.get).to.exist();
-        return request.get('http://localhost:8000/literal', {});
+        return request.req.get('http://localhost:8000/literal', {});
       }
     });
     testServer.route({
@@ -392,7 +391,7 @@ lab.experiment('request', (allDone) => {
       path: '/request',
       method: 'get',
       handler(request, h) {
-        return request.get('http://localhost:8000/literal');
+        return request.req.get('http://localhost:8000/literal');
       }
     });
     testServer.route({
@@ -425,7 +424,7 @@ lab.experiment('request', (allDone) => {
       async handler(request, h) {
         request.timingStart = () => {};
         request.plugins['hapi-timing'] = {};
-        const result = await request.get('http://localhost:8000/literal', {});
+        const result = await request.req.get('http://localhost:8000/literal', {});
         code.expect(typeof request.plugins['hapi-timing']['hapi-req']).to.equal('number');
         return result;
       }

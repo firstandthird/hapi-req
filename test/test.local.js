@@ -397,8 +397,12 @@ lab.experiment('request', (allDone) => {
       path: '/request',
       method: 'get',
       handler(request, h) {
-        code.expect(request.get).to.exist();
-        return request.get('/literal', {});
+        code.expect(typeof request.req.get).to.equal('function');
+        code.expect(typeof request.req.post).to.equal('function');
+        code.expect(typeof request.req.put).to.equal('function');
+        code.expect(typeof request.req.delete).to.equal('function');
+        code.expect(typeof request.req.patch).to.equal('function');
+        return request.req.get('/literal', {});
       }
     });
     server.route({
@@ -417,7 +421,7 @@ lab.experiment('request', (allDone) => {
       path: '/request',
       method: 'get',
       handler(request, h) {
-        return request.get('/literal');
+        return request.req.get('/literal');
       }
     });
     server.route({
@@ -450,7 +454,7 @@ lab.experiment('request', (allDone) => {
       async handler(request, h) {
         request.timingStart = () => {};
         request.plugins['hapi-timing'] = {};
-        const result = await request.get('/literal', {});
+        const result = await request.req.get('/literal', {});
         code.expect(typeof request.plugins['hapi-timing']['hapi-req']).to.equal('number');
         return result;
       }

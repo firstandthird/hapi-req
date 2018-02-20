@@ -50,27 +50,29 @@ const register = function(server, pluginOptions = {}) {
   };
   server.decorate('server', 'req', req);
 
-  // decorate the request directly to access the request object:
-  server.decorate('request', 'get', function (url, options = {}) {
-    options.request = this;
-    return callIt('get', url, options);
-  });
-  server.decorate('request', 'post', function (url, options = {}) {
-    options.request = this;
-    return callIt('post', url, options);
-  });
-  server.decorate('request', 'put', function (url, options = {}) {
-    options.request = this;
-    return callIt('put', url, options);
-  });
-  server.decorate('request', 'delete', function (url, options = {}) {
-    options.request = this;
-    return callIt('delete', url, options);
-  });
-  server.decorate('request', 'patch', function (url, options = {}) {
-    options.request = this;
-    return callIt('patch', url, options);
-  });
+  // 'apply' will regenerate the functions in request.req for each incoming request:
+  server.decorate('request', 'req', (request) => ({
+    get(url, options = {}) {
+      options.request = request;
+      return callIt('get', url, options);
+    },
+    post(url, options = {}) {
+      options.request = request;
+      return callIt('post', url, options);
+    },
+    put(url, options = {}) {
+      options.request = request;
+      return callIt('put', url, options);
+    },
+    delete(url, options = {}) {
+      options.request = request;
+      return callIt('delete', url, options);
+    },
+    patch(url, options = {}) {
+      options.request = request;
+      return callIt('patch', url, options);
+    },
+  }), { apply: true });
 };
 
 exports.plugin = {
