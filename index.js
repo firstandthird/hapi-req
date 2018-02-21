@@ -48,8 +48,31 @@ const register = function(server, pluginOptions = {}) {
     delete: (url, options) => callIt('delete', url, options),
     patch: (url, options) => callIt('patch', url, options)
   };
-
   server.decorate('server', 'req', req);
+
+  // 'apply' will regenerate the functions in request.req for each incoming request:
+  server.decorate('request', 'req', (request) => ({
+    get(url, options = {}) {
+      options.request = request;
+      return callIt('get', url, options);
+    },
+    post(url, options = {}) {
+      options.request = request;
+      return callIt('post', url, options);
+    },
+    put(url, options = {}) {
+      options.request = request;
+      return callIt('put', url, options);
+    },
+    delete(url, options = {}) {
+      options.request = request;
+      return callIt('delete', url, options);
+    },
+    patch(url, options = {}) {
+      options.request = request;
+      return callIt('patch', url, options);
+    },
+  }), { apply: true });
 };
 
 exports.plugin = {

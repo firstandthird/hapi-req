@@ -373,3 +373,100 @@ lab.experiment('retry', () => {
     code.expect(response.count).to.equal(2);
   });
 });
+
+lab.experiment('request', (allDone) => {
+  let server;
+
+  lab.beforeEach(async () => {
+    server = new hapi.Server({ port: 9000 });
+    await server.register({
+      plugin: hapiReq,
+      options: {
+        verbose: true
+      }
+    });
+    await server.start();
+  });
+
+  lab.afterEach(async () => {
+    await server.stop();
+  });
+
+  lab.test('can be called from the request', async () => {
+    server.route({
+      path: '/request',
+      method: 'get',
+      handler(request, h) {
+        code.expect(typeof request.req.get).to.equal('function');
+        code.expect(typeof request.req.post).to.equal('function');
+        code.expect(typeof request.req.put).to.equal('function');
+        code.expect(typeof request.req.delete).to.equal('function');
+        code.expect(typeof request.req.patch).to.equal('function');
+        return request.req.get('/literal', {});
+      }
+    });
+    server.route({
+      path: '/literal',
+      method: 'get',
+      handler(request, h) {
+        return { f: 'true' };
+      }
+    });
+    const response = await server.req.get('/request');
+    code.expect(response).to.equal({ f: 'true' });
+  });
+
+  lab.test('verbose mode includes request url when called from request', async () => {
+    server.route({
+      path: '/request',
+      method: 'get',
+      handler(request, h) {
+        return request.req.get('/literal');
+      }
+    });
+    server.route({
+      path: '/literal',
+      method: 'get',
+      handler(request, h) {
+        return { f: 'true' };
+      }
+    });
+    const statements = [];
+    server.events.on('log', (event, tags) => {
+      statements.push(event.data);
+    });
+    await server.req.get('/request');
+    const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
+    await wait(300);
+    code.expect(typeof statements[0].duration).to.equal('number');
+    delete statements[0].duration;
+    code.expect(statements[0]).to.equal({
+      url: '/literal',
+      statusCode: 200,
+      requestUrl: '/request'
+    });
+  });
+
+  lab.test('will add response time to hapi-timing if it is in use', async () => {
+    server.route({
+      path: '/request',
+      method: 'get',
+      async handler(request, h) {
+        request.timingStart = () => {};
+        request.plugins['hapi-timing'] = {};
+        const result = await request.req.get('/literal', {});
+        code.expect(typeof request.plugins['hapi-timing']['hapi-req']).to.equal('number');
+        return result;
+      }
+    });
+    server.route({
+      path: '/literal',
+      method: 'get',
+      handler(request, h) {
+        return { f: 'true' };
+      }
+    });
+    const response = await server.req.get('/request');
+    code.expect(response).to.equal({ f: 'true' });
+  });
+});
