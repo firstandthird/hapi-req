@@ -31,7 +31,8 @@ module.exports = async(server, method, url, options) => {
     const data = {
       url,
       statusCode: res.statusCode,
-      duration
+      duration,
+      threshold: options.slowWarningLocal
     };
     if (options.request) {
       data.requestUrl = options.request.url.href;

@@ -154,7 +154,7 @@ lab.experiment('verbose mode', (allDone) => {
     const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
     await wait(2000);
     const data = logs[0];
-    code.expect(Object.keys(data)).to.equal(['url', 'statusCode', 'duration']);
+    code.expect(Object.keys(data)).to.equal(['url', 'statusCode', 'duration', 'threshold']);
     code.expect(typeof data.duration).to.equal('number');
     code.expect(data.duration).to.be.greaterThan(99);
   });
@@ -464,6 +464,7 @@ lab.experiment('request', (allDone) => {
     code.expect(statements[0]).to.equal({
       url: 'http://localhost:8000/literal',
       statusCode: 200,
+      threshold: 300,
       requestUrl: '/request'
     });
   });
