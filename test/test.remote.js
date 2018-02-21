@@ -45,15 +45,66 @@ lab.experiment('slow warning', (allDone) => {
     const logs = [];
     server.events.on('log', (event, tags) => {
       code.expect(tags.warning).to.equal(true); // make sure 'warning' tag is present
+      code.expect(tags.slow).to.equal(true); // make sure 'slow' tag is present
       logs.push(event.data);
     });
     await server.req.get('http://localhost:8000/literal', {});
     const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
     await wait(2000);
     const data = logs[0];
-    code.expect(Object.keys(data)).to.equal(['url', 'statusCode', 'duration']);
+    code.expect(Object.keys(data)).to.equal(['url', 'statusCode', 'duration', 'threshold']);
     code.expect(typeof data.duration).to.equal('number');
     code.expect(data.duration).to.be.greaterThan(99);
+  });
+});
+
+lab.experiment('slow warning disabled', (allDone) => {
+  let testServer;
+  let server;
+
+  lab.beforeEach(async() => {
+    testServer = new hapi.Server({
+      port: 8000,
+    });
+    server = new hapi.Server({
+      port: 9000,
+      debug: {
+        log: ['*', 'hapi-req']
+      }
+    });
+    await server.register({
+      plugin: hapiReq,
+      options: {
+        slowWarningRemote: false
+      }
+    });
+    await testServer.start();
+    await server.start();
+  });
+  lab.afterEach(async() => {
+    await testServer.stop();
+    await server.stop();
+  });
+
+  lab.test('always prints out warning when slowWarningRemote is exceeded', { timeout: 10000 }, async() => {
+    testServer.route({
+      path: '/literal',
+      method: 'get',
+      handler: async(request, h) => {
+        const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
+        await wait(100);
+        return {};
+      }
+    });
+    const logs = [];
+    server.events.on('log', (event, tags) => {
+      code.expect(tags.warning).to.equal(true); // make sure 'warning' tag is present
+      logs.push(event.data);
+    });
+    await server.req.get('http://localhost:8000/literal', {});
+    const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
+    await wait(2000);
+    code.expect(logs.length).to.equal(0);
   });
 });
 
