@@ -20,17 +20,19 @@ module.exports = async(server, method, url, options) => {
   if (options.request && options.request.timingStart) {
     options.request.plugins['hapi-timing']['hapi-req'] = duration;
   }
-  if (duration > options.slowWarningLocal) {
-    server.log(['hapi-req', 'local', 'warning'], {
+  if (options.slowWarningLocal && duration > options.slowWarningLocal) {
+    server.log(['hapi-req', 'local', 'warning', 'slow'], {
       url,
       statusCode: res.statusCode,
-      duration
+      duration,
+      threshold: options.slowWarningLocal
     });
   } else if (options.verbose) {
     const data = {
       url,
       statusCode: res.statusCode,
-      duration
+      duration,
+      threshold: options.slowWarningLocal
     };
     if (options.request) {
       data.requestUrl = options.request.url.href;

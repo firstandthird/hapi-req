@@ -4,8 +4,8 @@ const querystring = require('querystring');
 
 const defaults = {
   maxRetries: 0,
-  slowWarningRemote: 200,
-  slowWarningLocal: 100,
+  slowWarningRemote: 300,
+  slowWarningLocal: 200,
   json: 'force'
 };
 

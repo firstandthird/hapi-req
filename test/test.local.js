@@ -43,15 +43,62 @@ lab.experiment('slow warning', () => {
     const logs = [];
     server.events.on('log', (event, tags) => {
       code.expect(tags.warning).to.equal(true); // make sure 'warning' tag is present
+      code.expect(tags.slow).to.equal(true); // make sure 'slow' tag is present
       logs.push(event.data);
     });
     await server.req.get('/literal', {});
     const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
     await wait(1000);
     const data = logs[0];
-    code.expect(Object.keys(data)).to.equal(['url', 'statusCode', 'duration']);
+    code.expect(Object.keys(data)).to.equal(['url', 'statusCode', 'duration', 'threshold']);
     code.expect(typeof data.duration).to.equal('number');
     code.expect(data.duration).to.be.greaterThan(99);
+  });
+});
+
+lab.experiment('slow warning disabled', () => {
+  lab.beforeEach(async () => {
+    testServer = new hapi.Server({ port: 8000 });
+    server = new hapi.Server({
+      port: 9000,
+      debug: {
+        log: ['*']
+      }
+    });
+    await server.register({
+      plugin: hapiReq,
+      options: {
+        slowWarningLocal: false
+      }
+    });
+    await testServer.start();
+    await server.start();
+  });
+
+  lab.afterEach(async () => {
+    await testServer.stop();
+    await server.stop();
+  });
+
+  lab.test('never prints out warning when slowWarningLocal is set to false', async() => {
+    server.route({
+      path: '/literal',
+      method: 'get',
+      async handler(request, h) {
+        const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
+        await wait(100);
+        return { f: 'true' };
+      }
+    });
+    const logs = [];
+    server.events.on('log', (event, tags) => {
+      code.expect(tags.warning).to.equal(true); // make sure 'warning' tag is present
+      logs.push(event.data);
+    });
+    await server.req.get('/literal', {});
+    const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
+    await wait(1000);
+    code.expect(logs.length).to.equal(0);
   });
 });
 
@@ -97,7 +144,7 @@ lab.experiment('verbose mode', () => {
     const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
     await wait(1000);
     const data = logs[0];
-    code.expect(Object.keys(data)).to.equal(['url', 'statusCode', 'duration']);
+    code.expect(Object.keys(data)).to.equal(['url', 'statusCode', 'duration', 'threshold']);
     code.expect(typeof data.duration).to.equal('number');
     code.expect(data.duration).to.be.greaterThan(99);
   });
@@ -443,6 +490,7 @@ lab.experiment('request', (allDone) => {
     code.expect(statements[0]).to.equal({
       url: '/literal',
       statusCode: 200,
+      threshold: 200,
       requestUrl: '/request'
     });
   });
