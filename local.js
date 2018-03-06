@@ -44,6 +44,10 @@ module.exports = async(server, method, url, options) => {
     throw Boom.boomify(res);
   }
 
+  // if json is true then just return the paylod buffer:
+  if (options.json) {
+    return res.payload;
+  }
   let out = null;
 
   try {
@@ -53,10 +57,6 @@ module.exports = async(server, method, url, options) => {
     }
     return out;
   } catch (e) {
-    // if json is true then just return the paylod buffer:
-    if (options.json) {
-      return res.payload;
-    }
     throw Boom.badRequest('returned payload was not valid JSON', res.payload);
   }
 };
