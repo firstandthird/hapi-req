@@ -45,7 +45,7 @@ module.exports = async(server, method, url, options) => {
   }
 
   // if json is true then just return the paylod buffer without trying to parse it:
-  if (options.json) {
+  if (options.json === true) {
     if (options.returnResponse) {
       return { result: res, payload: res.payload };
     }
