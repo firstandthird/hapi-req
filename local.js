@@ -44,6 +44,13 @@ module.exports = async(server, method, url, options) => {
     throw Boom.boomify(res);
   }
 
+  // if json is true then just return the paylod buffer without trying to parse it:
+  if (options.json === true) {
+    if (options.returnResponse) {
+      return { result: res, payload: res.payload };
+    }
+    return res.payload;
+  }
   let out = null;
 
   try {
