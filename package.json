@@ -3,7 +3,7 @@
   "description": "hapi plugin to manage http requests",
   "homepage": "https://github.com/firstandthird/hapi-req",
   "author": "First+Third",
-  "version": "2.3.1",
+  "version": "2.3.2",
   "repository": {
     "type": "git",
     "url": "https://github.com/firstandthird/hapi-req.git"
