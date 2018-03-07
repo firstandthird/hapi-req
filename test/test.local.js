@@ -278,9 +278,9 @@ lab.experiment('local', () => {
       handler: (request, h) => 'not json'
     });
     // when json option is true, inject will return the string if it cannot parse it as JSON:
-    const result1 = await server.req.get('http://localhost:8000/literal', { json: true });
+    const result1 = await server.req.get('http://localhost:8000/literal', { json: false });
     code.expect(result1.toString()).to.equal('not json');
-    const result2 = await server.req.get('http://localhost:8000/literal', { json: true, returnResponse: true });
+    const result2 = await server.req.get('http://localhost:8000/literal', { json: false, returnResponse: true });
     code.expect(typeof result2.result).to.equal('object');
     code.expect(result2.payload.toString()).to.equal('not json');
   });
