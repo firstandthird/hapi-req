@@ -231,7 +231,7 @@ lab.experiment('remote settings', (allDone) => {
       handler: (request, h) => 'not json'
     });
     // when json option is true, wreck will return the string if it cannot parse it as JSON:
-    const result1 = await server.req.get('http://localhost:8000/literal', { json: true });
+    const result1 = await server.req.get('http://localhost:8000/literal', { json: false });
     code.expect(result1.toString()).to.equal('not json');
   });
 });
