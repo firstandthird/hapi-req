@@ -42,7 +42,7 @@ module.exports = async(server, method, url, options) => {
 
   if (res.statusCode >= 400) {
     const msg = res.result.message || 'There has been an error';
-    throw Boom.boomify(new Error(msg), { statusCode: res.statusCode, message: msg, override: false });
+    throw Boom.boomify(new Error(msg), { statusCode: res.statusCode });
   }
 
   // if json is true then just return the paylod buffer without trying to parse it:

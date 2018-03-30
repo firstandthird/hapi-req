@@ -177,12 +177,12 @@ lab.experiment('local', () => {
     code.expect(result.f).to.equal('true');
   });
 
-  lab.test('get failures are handled', async () => {
+  lab.test.only('get failures are handled', async () => {
     try {
       await server.req.get('/literal', {});
     } catch (err) {
       code.expect(err.output.statusCode).to.equal(404);
-      code.expect(err.output.payload.message).to.equal('Not Found: Not Found');
+      code.expect(err.output.payload.message).to.equal('Not Found');
       code.expect(err).to.not.equal(null);
     }
   });
