@@ -181,6 +181,8 @@ lab.experiment('local', () => {
     try {
       await server.req.get('/literal', {});
     } catch (err) {
+      code.expect(err.output.statusCode).to.equal(404);
+      code.expect(err.output.payload.message).to.equal('Not Found: Not Found');
       code.expect(err).to.not.equal(null);
     }
   });
