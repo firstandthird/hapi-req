@@ -394,6 +394,20 @@ lab.experiment('remote', (allDone) => {
       code.expect(err).to.not.equal(null);
     }
   });
+
+  lab.test('does not crash if result not json', async () => {
+    testServer.route({
+      path: '/literal',
+      method: 'get',
+      handler(request, h) {
+        return '<html>hello</html>';
+      }
+    });
+    code.expect(server.req.get).to.exist();
+    const result = await server.req.get('http://localhost:8000/literal', {});
+    console.log(result.headers);
+    code.expect(result).to.equal('<html>hello</html>');
+  });
 });
 
 lab.experiment('request', (allDone) => {

@@ -12,7 +12,7 @@ module.exports = async (server, method, url, options) => {
     packet.headers.referrer = options.request.url.href;
   }
   const startDate = new Date();
-  const { res, payload } = await wreck[method](url, packet);
+  let { res, payload } = await wreck[method](url, packet);
   const endDate = new Date();
   const duration = endDate.getTime() - startDate.getTime();
   if (options.request && options.request.timingStart) {
@@ -37,7 +37,10 @@ module.exports = async (server, method, url, options) => {
     }
     server.log(['hapi-req', 'info'], data);
   }
-
+  // if content wasn't json turn it into a string:
+  if (res.headers['content-type'].indexOf('json') === -1) {
+    payload = payload.toString();
+  }
   if (options.returnResponse) {
     return { result: res, payload };
   }

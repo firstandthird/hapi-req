@@ -6,7 +6,7 @@ const defaults = {
   maxRetries: 0,
   slowWarningRemote: false,
   slowWarningLocal: false,
-  json: 'force'
+  json: true
 };
 
 const register = function(server, pluginOptions = {}) {
