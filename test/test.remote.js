@@ -405,7 +405,6 @@ lab.experiment('remote', (allDone) => {
     });
     code.expect(server.req.get).to.exist();
     const result = await server.req.get('http://localhost:8000/literal', {});
-    console.log(result.headers);
     code.expect(result).to.equal('<html>hello</html>');
   });
 });
@@ -478,7 +477,7 @@ lab.experiment('request', (allDone) => {
     code.expect(statements[0]).to.equal({
       url: 'http://localhost:8000/literal',
       statusCode: 200,
-      threshold: 300,
+      threshold: false,
       requestUrl: '/request'
     });
   });
