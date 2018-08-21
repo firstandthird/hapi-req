@@ -16,7 +16,7 @@ const register = function(server, pluginOptions = {}) {
       let response;
       // construct url from any relevant options:
       const optionsQueryString = querystring.stringify(options.query);
-      if (optionsQueryString) {
+      if (count === 0 && optionsQueryString) {
         url = `${url}${url.includes('?') ? '&' : '?'}${optionsQueryString}`;
       }
       if (url[0] === '/') {
@@ -30,8 +30,10 @@ const register = function(server, pluginOptions = {}) {
       return response;
     } catch (e) {
       if (count < options.maxRetries) {
-        server.log(['hapi-req', 'info'], `Retry #${count + 1}: ${method} ${url}`);
-        return callIt(method, url, options, count + 1);
+        if (e.isBoom && e.output.statusCode > 499) {
+          server.log(['hapi-req', 'info'], `Retry #${count + 1}: ${method} ${url}`);
+          return callIt(method, url, options, count + 1);
+        }
       }
 
       if (options.maxRetries) {

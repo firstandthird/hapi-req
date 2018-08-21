@@ -3,6 +3,7 @@ const Lab = require('lab');
 const lab = exports.lab = Lab.script();
 const code = require('code');
 const hapiReq = require('../index.js');
+const boom = require('boom');
 let testServer;
 let server;
 
@@ -417,7 +418,7 @@ lab.experiment('retry', () => {
     retryCount = 0;
   });
 
-  lab.test('failures are retried', async () => {
+  lab.test('< HTTP 5xx failures are not retried', async () => {
     server.route({
       path: '/error',
       method: 'get',
@@ -428,12 +429,52 @@ lab.experiment('retry', () => {
           return { count: retryCount };
         }
 
-        throw new Error('test error');
+        throw boom.badRequest('test error');
+      }
+    });
+    try {
+      await server.req.get('/error', {});
+    } catch (e) {
+      code.expect(retryCount).to.equal(1);
+      return;
+    }
+    code.fail('should have thrown an error');
+  });
+  lab.test('HTTP 5xx failures are retried', async () => {
+    server.route({
+      path: '/error',
+      method: 'get',
+      handler(request, h) {
+        retryCount++;
+
+        if (retryCount > 2) {
+          return { count: retryCount };
+        }
+        if (retryCount === 1) {
+          throw boom.badImplementation('test error');
+        }
+        throw boom.badGateway('test error');
       }
     });
 
     const response = await server.req.get('/error', {});
-    code.expect(response.count).to.equal(2);
+    code.expect(response.count).to.equal(3);
+  });
+
+  lab.test('querystrings do not get duplicated when failures are retried', async () => {
+    server.route({
+      path: '/error',
+      method: 'get',
+      handler(request, h) {
+        retryCount++;
+        code.expect(request.url.path).to.equal('/error?blah=value1');
+        if (retryCount > 2) {
+          return { count: retryCount };
+        }
+        throw boom.badImplementation('test error');
+      }
+    });
+    await server.req.get('/error', { query: { blah: 'value1' } });
   });
 });
 
