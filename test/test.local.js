@@ -435,6 +435,22 @@ lab.experiment('retry', () => {
     const response = await server.req.get('/error', {});
     code.expect(response.count).to.equal(2);
   });
+
+  lab.test('querystrings do not get duplicated when failures are retried', async () => {
+    server.route({
+      path: '/error',
+      method: 'get',
+      handler(request, h) {
+        retryCount++;
+        code.expect(request.url.path).to.equal('/error?blah=value1');
+        if (retryCount > 2) {
+          return { count: retryCount };
+        }
+        throw new Error('test error');
+      }
+    });
+    await server.req.get('/error', { query: { blah: 'value1' } });
+  });
 });
 
 lab.experiment('request', (allDone) => {

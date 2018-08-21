@@ -16,7 +16,7 @@ const register = function(server, pluginOptions = {}) {
       let response;
       // construct url from any relevant options:
       const optionsQueryString = querystring.stringify(options.query);
-      if (optionsQueryString) {
+      if (count === 0 && optionsQueryString) {
         url = `${url}${url.includes('?') ? '&' : '?'}${optionsQueryString}`;
       }
       if (url[0] === '/') {
