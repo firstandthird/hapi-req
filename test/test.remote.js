@@ -406,7 +406,8 @@ lab.experiment('request', (allDone) => {
     await server.register({
       plugin: hapiReq,
       options: {
-        verbose: true
+        verbose: true,
+        slowWarningRemote: 300
       }
     });
     await testServer.start();

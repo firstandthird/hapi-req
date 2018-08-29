@@ -29,15 +29,19 @@ const register = function(server, pluginOptions = {}) {
       }
       return response;
     } catch (e) {
-      if (count < options.maxRetries) {
-        if (e.isBoom && e.output.statusCode > 499) {
-          server.log(['hapi-req', 'info'], `Retry #${count + 1}: ${method} ${url}`);
+      const statusCode = e.isBoom ? e.output.statusCode : e.statusCode;
+      if (statusCode > 499) {
+        if (count < options.maxRetries) {
+          server.log(['hapi-req', 'info'], `Retry #${count + 1}: ${method} ${url} ${e.output.statusCode}`);
           return callIt(method, url, options, count + 1);
         }
+        // only log if we've retried previously:
+        if (count > 1 && options.maxRetries) {
+          server.log(['hapi-req', 'info'], `Max retries: ${method} ${url} ${e.output.statusCode}`);
+        }
       }
-
-      if (options.maxRetries) {
-        server.log(['hapi-req', 'info'], `Max retries: ${method} ${url}`);
+      if (options.logErrors) {
+        server.log(['hapi-req', 'error'], { message: e.message, method, url, error: e });
       }
       throw e;
     }
