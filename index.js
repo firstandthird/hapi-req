@@ -32,12 +32,12 @@ const register = function(server, pluginOptions = {}) {
       const statusCode = e.isBoom ? e.output.statusCode : e.statusCode;
       if (statusCode > 499) {
         if (count < options.maxRetries) {
-          server.log(['hapi-req', 'info'], `Retry #${count + 1}: ${method} ${url} ${e.output.statusCode}`);
+          server.log(['hapi-req', 'info'], `Retry #${count + 1}: ${method} ${url} ${statusCode}`);
           return callIt(method, url, options, count + 1);
         }
         // only log if we've retried previously:
         if (count > 0 && options.maxRetries) {
-          server.log(['hapi-req', 'info'], `Max retries: ${method} ${url} ${e.output.statusCode}`);
+          server.log(['hapi-req', 'info'], `Max retries: ${method} ${url} ${statusCode}`);
         }
       }
       if (options.logErrors) {
