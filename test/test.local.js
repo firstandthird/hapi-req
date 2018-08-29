@@ -178,7 +178,7 @@ lab.experiment('local', () => {
     code.expect(result.f).to.equal('true');
   });
 
-  lab.test.only('get failures are handled', async () => {
+  lab.test('get failures are handled', async () => {
     try {
       await server.req.get('/literal', {});
     } catch (err) {
@@ -476,6 +476,24 @@ lab.experiment('retry', () => {
     });
     await server.req.get('/error', { query: { blah: 'value1' } });
   });
+
+  lab.test('timeouts are retried', { timeout: 60000 }, async () => {
+    let count = 0;
+    server.route({
+      path: '/literal',
+      method: 'post',
+      async handler(request, h) {
+        if (count > 0) {
+          return { hi: 5 };
+        }
+        count++;
+        const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+        await wait(30000);
+      }
+    });
+    await server.req.post('/literal', {});
+    code.expect(count).to.equal(1);
+  });
 });
 
 lab.experiment('request', (allDone) => {
@@ -486,7 +504,8 @@ lab.experiment('request', (allDone) => {
     await server.register({
       plugin: hapiReq,
       options: {
-        verbose: true
+        verbose: true,
+        slowWarningLocal: 200
       }
     });
     await server.start();
