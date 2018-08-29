@@ -36,7 +36,7 @@ const register = function(server, pluginOptions = {}) {
           return callIt(method, url, options, count + 1);
         }
         // only log if we've retried previously:
-        if (count > 1 && options.maxRetries) {
+        if (count > 0 && options.maxRetries) {
           server.log(['hapi-req', 'info'], `Max retries: ${method} ${url} ${e.output.statusCode}`);
         }
       }
