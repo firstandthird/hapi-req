@@ -56,6 +56,31 @@ lab.experiment('slow warning', (allDone) => {
     code.expect(typeof data.duration).to.equal('number');
     code.expect(data.duration).to.be.greaterThan(99);
   });
+
+  lab.test('log when timeout happens', { timeout: 1000 }, async() => {
+    testServer.route({
+      path: '/literal',
+      method: 'get',
+      handler: async(request, h) => {
+        const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
+        await wait(100);
+        return {};
+      }
+    });
+    const logs = [];
+    server.events.on('log', (event, tags) => {
+      logs.push(event.data);
+    });
+    try {
+      await server.req.get('http://localhost:8000/literal', { timeout: 1 });
+    } catch (e) {
+      code.expect(e).to.exist();
+    }
+    const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
+    await wait(500);
+    const data = logs[0];
+    code.expect(Object.keys(data)).to.equal(['url', 'packet']);
+  });
 });
 
 lab.experiment('slow warning disabled', (allDone) => {
