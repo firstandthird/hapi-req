@@ -11,7 +11,7 @@ module.exports = async(server, method, url, options) => {
     packet.payload = options.payload;
   }
   if (options.request) {
-    packet.headers.referrer = options.request.url.href;
+    packet.headers.referrer = options.request.path;
   }
   const startDate = new Date();
   const res = await server.inject(packet);
@@ -35,7 +35,7 @@ module.exports = async(server, method, url, options) => {
       threshold: options.slowWarningLocal
     };
     if (options.request) {
-      data.requestUrl = options.request.url.href;
+      data.requestUrl = options.request.path;
     }
     server.log(['hapi-req', 'info'], data);
   }
