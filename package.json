@@ -15,11 +15,11 @@
   "devDependencies": {
     "code": "^5.1.2",
     "coveralls": "^3.0.0",
-    "eslint": "^4.13.1",
+    "eslint": "^5.13.0",
     "eslint-config-firstandthird": "^4.2.1",
     "eslint-plugin-import": "^2.8.0",
-    "hapi": "^17.2.0",
-    "lab": "^15.1.2"
+    "hapi": "^18.0.0",
+    "lab": "^18.0.1"
   },
   "dependencies": {
     "boom": "^7.1.1",

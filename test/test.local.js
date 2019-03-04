@@ -467,14 +467,18 @@ lab.experiment('retry', () => {
       method: 'get',
       handler(request, h) {
         retryCount++;
-        code.expect(request.url.path).to.equal('/error?blah=value1');
+
+        code.expect(request.url.search).to.equal('?blah=value1');
+
         if (retryCount > 2) {
           return { count: retryCount };
         }
+
         throw boom.badImplementation('test error');
       }
     });
-    await server.req.get('/error', { query: { blah: 'value1' } });
+    const response = await server.req.get('/error', { query: { blah: 'value1' } });
+    code.expect(response.count).to.equal(3);
   });
 
   lab.test('timeouts are retried', { timeout: 60000 }, async () => {
