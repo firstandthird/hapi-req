@@ -33,5 +33,6 @@
     "parserOptions": {
       "ecmaVersion": 2017
     }
-  }
+  },
+  "license": "MIT"
 }
