@@ -9,7 +9,7 @@
     "url": "https://github.com/firstandthird/hapi-req.git"
   },
   "scripts": {
-    "test": "lab --leaks -e test -c ",
+    "test": "lab -e test/test.**.js -c ",
     "coveralls": "lab -r lcov | coveralls"
   },
   "devDependencies": {
